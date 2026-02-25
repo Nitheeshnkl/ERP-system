@@ -15,4 +15,7 @@ const purchaseOrderSchema = new mongoose.Schema({
   status: { type: String, enum: ['Pending', 'Received', 'Cancelled'], default: 'Pending' }
 }, { timestamps: true });
 
+purchaseOrderSchema.index({ supplierName: 1 });
+purchaseOrderSchema.index({ status: 1 });
+
 module.exports = mongoose.model('PurchaseOrder', purchaseOrderSchema);

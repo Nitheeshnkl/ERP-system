@@ -2,11 +2,19 @@ const Invoice = require('../models/Invoice');
 const path = require('path');
 const fs = require('fs');
 const { success, error } = require('../utils/response');
+const { getPaginationOptions, buildSearchFilter, buildMeta } = require('../utils/pagination');
 
 exports.getInvoices = async (req, res) => {
   try {
-    const invoices = await Invoice.find().populate({ path: 'salesOrderId', select: 'customerId customerName totalAmount status createdAt' });
-    return success(res, invoices, 'Invoices fetched successfully');
+    const { page, limit, skip, search } = getPaginationOptions(req.query);
+    const filter = buildSearchFilter(search, ['paymentStatus']);
+    const total = await Invoice.countDocuments(filter);
+    const invoices = await Invoice.find(filter)
+      .populate({ path: 'salesOrderId', select: 'customerId customerName totalAmount status createdAt' })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    return success(res, invoices, 'Invoices fetched successfully', 200, { ...buildMeta(total, page, limit), search });
   } catch (requestError) {
     return error(res, requestError.message, 500);
   }

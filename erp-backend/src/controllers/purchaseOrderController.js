@@ -1,10 +1,22 @@
 const PurchaseOrder = require('../models/PurchaseOrder');
 const { success, error } = require('../utils/response');
+const { getPaginationOptions, buildSearchFilter, buildMeta } = require('../utils/pagination');
 
 exports.getPurchaseOrders = async (req, res) => {
   try {
-    const orders = await PurchaseOrder.find().populate({ path: 'supplierId', select: 'name email phone' });
-    return success(res, orders, 'Purchase orders fetched successfully');
+    const { page, limit, skip, search } = getPaginationOptions(req.query);
+    const filter = buildSearchFilter(search, ['supplierName', 'status']);
+    const total = await PurchaseOrder.countDocuments(filter);
+    const orders = await PurchaseOrder.find(filter)
+      .populate({ path: 'supplierId', select: 'name email phone' })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return success(res, orders, 'Purchase orders fetched successfully', 200, {
+      ...buildMeta(total, page, limit),
+      search,
+    });
   } catch (requestError) {
     return error(res, requestError.message, 500);
   }
@@ -12,7 +24,9 @@ exports.getPurchaseOrders = async (req, res) => {
 
 exports.getPurchaseOrder = async (req, res) => {
   try {
-    const order = await PurchaseOrder.findById(req.params.id).populate({ path: 'supplierId', select: 'name email phone' }).populate({ path: 'items.productId', select: 'name sku stockQuantity' });
+    const order = await PurchaseOrder.findById(req.params.id)
+      .populate({ path: 'supplierId', select: 'name email phone' })
+      .populate({ path: 'items.productId', select: 'name sku stockQuantity' });
     if (!order) {
       return error(res, 'Purchase Order not found', 404);
     }

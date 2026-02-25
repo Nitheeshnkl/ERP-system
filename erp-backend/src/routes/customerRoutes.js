@@ -3,13 +3,21 @@ const router = express.Router();
 const Customer = require('../models/Customer');
 const { checkAuth, checkRole } = require('../middleware/auth');
 const { success, error } = require('../utils/response');
+const { getPaginationOptions, buildSearchFilter, buildMeta } = require('../utils/pagination');
 
 router.use(checkAuth);
 
 router.get('/', checkRole('Admin', 'Sales'), async (req, res) => {
   try {
-    const customers = await Customer.find();
-    return success(res, customers, 'Customers fetched successfully');
+    const { page, limit, skip, search } = getPaginationOptions(req.query);
+    const filter = buildSearchFilter(search, ['name', 'email', 'phone']);
+    const total = await Customer.countDocuments(filter);
+    const customers = await Customer.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit);
+
+    return success(res, customers, 'Customers fetched successfully', 200, {
+      ...buildMeta(total, page, limit),
+      search,
+    });
   } catch (requestError) {
     return error(res, requestError.message, 500);
   }

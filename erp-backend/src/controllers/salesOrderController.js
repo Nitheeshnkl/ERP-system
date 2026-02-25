@@ -4,11 +4,24 @@ const Product = require('../models/Product');
 const Invoice = require('../models/Invoice');
 const { generateInvoicePDF } = require('../utils/pdfGenerator');
 const { success, error } = require('../utils/response');
+const { getPaginationOptions, buildSearchFilter, buildMeta } = require('../utils/pagination');
 
 exports.getSalesOrders = async (req, res) => {
   try {
-    const orders = await SalesOrder.find().populate({ path: 'customerId', select: 'name email' }).populate({ path: 'items.productId', select: 'name sku stockQuantity' });
-    return success(res, orders, 'Sales orders fetched successfully');
+    const { page, limit, skip, search } = getPaginationOptions(req.query);
+    const filter = buildSearchFilter(search, ['customerName', 'status']);
+    const total = await SalesOrder.countDocuments(filter);
+    const orders = await SalesOrder.find(filter)
+      .populate({ path: 'customerId', select: 'name email' })
+      .populate({ path: 'items.productId', select: 'name sku stockQuantity' })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return success(res, orders, 'Sales orders fetched successfully', 200, {
+      ...buildMeta(total, page, limit),
+      search,
+    });
   } catch (requestError) {
     return error(res, requestError.message, 500);
   }
@@ -16,7 +29,9 @@ exports.getSalesOrders = async (req, res) => {
 
 exports.getSalesOrder = async (req, res) => {
   try {
-    const order = await SalesOrder.findById(req.params.id).populate({ path: 'customerId', select: 'name email' }).populate({ path: 'items.productId', select: 'name sku stockQuantity' });
+    const order = await SalesOrder.findById(req.params.id)
+      .populate({ path: 'customerId', select: 'name email' })
+      .populate({ path: 'items.productId', select: 'name sku stockQuantity' });
     if (!order) {
       return error(res, 'Sales Order not found', 404);
     }

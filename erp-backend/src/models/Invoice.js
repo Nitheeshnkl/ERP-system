@@ -13,4 +13,6 @@ const invoiceSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+invoiceSchema.index({ paymentStatus: 1 });
+
 module.exports = mongoose.model('Invoice', invoiceSchema);

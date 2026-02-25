@@ -7,4 +7,6 @@ const supplierSchema = new mongoose.Schema({
   address: { type: String }
 }, { timestamps: true });
 
+supplierSchema.index({ name: 1 });
+
 module.exports = mongoose.model('Supplier', supplierSchema);

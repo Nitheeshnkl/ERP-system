@@ -15,4 +15,7 @@ const salesOrderSchema = new mongoose.Schema({
   status: { type: String, enum: ['Pending', 'Processing', 'Completed', 'Cancelled'], default: 'Pending' }
 }, { timestamps: true });
 
+salesOrderSchema.index({ customerName: 1 });
+salesOrderSchema.index({ status: 1 });
+
 module.exports = mongoose.model('SalesOrder', salesOrderSchema);
