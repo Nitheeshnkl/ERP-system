@@ -1,23 +1,37 @@
 const jwt = require('jsonwebtoken');
+const { error } = require('../utils/response');
 
 exports.checkAuth = (req, res, next) => {
-  const token = req.cookies.token;
-  if (!token) return res.status(401).json({ message: 'Unauthorized' });
+  let token = req.cookies?.token;
+
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+    }
+  }
+
+  if (!token) {
+    return error(res, 'Unauthorized - No token provided', 401);
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(401).json({ message: 'Invalid token' });
+    return next();
+  } catch (authError) {
+    if (authError.name === 'TokenExpiredError') {
+      return error(res, 'Token expired', 401);
+    }
+    return error(res, 'Invalid token', 401);
   }
 };
 
 exports.checkRole = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Forbidden: Insufficient privileges' });
+      return error(res, 'Forbidden: Insufficient privileges', 403);
     }
-    next();
+    return next();
   };
 };

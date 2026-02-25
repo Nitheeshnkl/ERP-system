@@ -3,13 +3,26 @@ const SalesOrder = require('../models/SalesOrder');
 const Product = require('../models/Product');
 const Invoice = require('../models/Invoice');
 const { generateInvoicePDF } = require('../utils/pdfGenerator');
+const { success, error } = require('../utils/response');
 
 exports.getSalesOrders = async (req, res) => {
   try {
     const orders = await SalesOrder.find().populate('customerId items.productId');
-    res.json(orders);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    return success(res, orders, 'Sales orders fetched successfully');
+  } catch (requestError) {
+    return error(res, requestError.message, 500);
+  }
+};
+
+exports.getSalesOrder = async (req, res) => {
+  try {
+    const order = await SalesOrder.findById(req.params.id).populate('customerId items.productId');
+    if (!order) {
+      return error(res, 'Sales Order not found', 404);
+    }
+    return success(res, order, 'Sales order fetched successfully');
+  } catch (requestError) {
+    return error(res, requestError.message, 500);
   }
 };
 
@@ -17,56 +30,82 @@ exports.createSalesOrder = async (req, res) => {
   try {
     const order = new SalesOrder(req.body);
     await order.save();
-    res.status(201).json(order);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+    return success(res, order, 'Sales order created successfully', 201);
+  } catch (requestError) {
+    return error(res, requestError.message, 400);
   }
 };
 
 exports.updateSalesOrder = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  let session = null;
+  let useTransaction = false;
   try {
-    const order = await SalesOrder.findById(req.params.id).session(session);
-    if (!order) throw new Error('Order not found');
-    
+    session = await mongoose.startSession();
+    try {
+      session.startTransaction();
+      useTransaction = true;
+    } catch (_transactionError) {
+      useTransaction = false;
+    }
+
+    const orderQuery = SalesOrder.findById(req.params.id);
+    const order = useTransaction ? await orderQuery.session(session) : await orderQuery;
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
     const oldStatus = order.status;
     order.status = req.body.status || order.status;
-    
-    // Support other updates
+
     if (req.body.items) order.items = req.body.items;
     if (req.body.totalAmount) order.totalAmount = req.body.totalAmount;
-    
-    await order.save({ session });
-    
-    // If completing the order, decrement stock and generate invoice
+
+    await order.save(useTransaction ? { session } : undefined);
+
     if (oldStatus !== 'Completed' && order.status === 'Completed') {
-      for (let item of order.items) {
-        const product = await Product.findById(item.productId).session(session);
+      for (const item of order.items) {
+        const productQuery = Product.findById(item.productId);
+        const product = useTransaction ? await productQuery.session(session) : await productQuery;
         if (!product) throw new Error(`Product not found: ${item.productId}`);
         if (product.stockQuantity < item.quantity) {
-           throw new Error(`Insufficient stock for product ${product.name}`);
+          throw new Error(`Insufficient stock for product ${product.name}`);
         }
         product.stockQuantity -= item.quantity;
-        await product.save({ session });
+        await product.save(useTransaction ? { session } : undefined);
       }
-      
-      // Generate Invoice
+
       const pdfPath = await generateInvoicePDF(order);
       const invoice = new Invoice({
         salesOrderId: order._id,
         amount: order.totalAmount,
         pdfPath
       });
-      await invoice.save({ session });
+      await invoice.save(useTransaction ? { session } : undefined);
     }
-    
-    await session.commitTransaction();
-    session.endSession();
-    res.json(order);
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    res.status(400).json({ message: error.message });
+
+    if (useTransaction) {
+      await session.commitTransaction();
+      session.endSession();
+    }
+
+    return success(res, order, 'Sales order updated successfully');
+  } catch (requestError) {
+    if (session && useTransaction) {
+      await session.abortTransaction();
+      session.endSession();
+    }
+    return error(res, requestError.message, 400);
+  }
+};
+
+exports.deleteSalesOrder = async (req, res) => {
+  try {
+    const order = await SalesOrder.findByIdAndDelete(req.params.id);
+    if (!order) {
+      return error(res, 'Sales Order not found', 404);
+    }
+    return success(res, null, 'Sales order deleted successfully');
+  } catch (requestError) {
+    return error(res, requestError.message, 500);
   }
 };

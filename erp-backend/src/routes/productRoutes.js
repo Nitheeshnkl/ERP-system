@@ -1,17 +1,58 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
-const { checkAuth } = require('../middleware/auth');
+const { checkAuth, checkRole } = require('../middleware/auth');
+const { success, error } = require('../utils/response');
 
 router.use(checkAuth);
 
-router.get('/', async (req, res) => res.json(await Product.find()));
-router.get('/:id', async (req, res) => res.json(await Product.findById(req.params.id)));
-router.post('/', async (req, res) => res.status(201).json(await new Product(req.body).save()));
-router.put('/:id', async (req, res) => res.json(await Product.findByIdAndUpdate(req.params.id, req.body, { new: true })));
-router.delete('/:id', async (req, res) => {
-  await Product.findByIdAndDelete(req.params.id);
-  res.sendStatus(204);
+router.get('/', checkRole('Admin', 'Sales', 'Purchase', 'Inventory'), async (req, res) => {
+  try {
+    const products = await Product.find();
+    return success(res, products, 'Products fetched successfully');
+  } catch (requestError) {
+    return error(res, requestError.message, 500);
+  }
+});
+
+router.get('/:id', checkRole('Admin', 'Sales', 'Purchase', 'Inventory'), async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return error(res, 'Product not found', 404);
+    return success(res, product, 'Product fetched successfully');
+  } catch (requestError) {
+    return error(res, requestError.message, 500);
+  }
+});
+
+router.post('/', checkRole('Admin', 'Inventory'), async (req, res) => {
+  try {
+    const product = new Product(req.body);
+    await product.save();
+    return success(res, product, 'Product created successfully', 201);
+  } catch (requestError) {
+    return error(res, requestError.message, 400);
+  }
+});
+
+router.put('/:id', checkRole('Admin', 'Inventory'), async (req, res) => {
+  try {
+    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!product) return error(res, 'Product not found', 404);
+    return success(res, product, 'Product updated successfully');
+  } catch (requestError) {
+    return error(res, requestError.message, 400);
+  }
+});
+
+router.delete('/:id', checkRole('Admin'), async (req, res) => {
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) return error(res, 'Product not found', 404);
+    return success(res, null, 'Product deleted successfully');
+  } catch (requestError) {
+    return error(res, requestError.message, 500);
+  }
 });
 
 module.exports = router;
