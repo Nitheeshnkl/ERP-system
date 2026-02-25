@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const connectDB = require('./src/config/db');
 const { success, error } = require('./src/utils/response');
 const { notFoundHandler, errorHandler } = require('./src/middleware/errorHandler');
+const { apiRateLimiter } = require('./src/middleware/rateLimit');
 
 // Route imports
 const authRoutes = require('./src/routes/authRoutes');
@@ -53,6 +54,7 @@ app.get('/ready', (_req, res) => {
 });
 
 // Routes
+app.use('/api', apiRateLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/customers', customerRoutes);
