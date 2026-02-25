@@ -117,6 +117,20 @@ Create an initial admin user for testing:
 SEED_USER_EMAIL=custom@example.com \
 SEED_USER_PASSWORD=SecurePass123 \
 npm run seed
+
+## Relationship Migration (ObjectId enforcement)
+
+This project includes a safe migration to normalize legacy string relationship IDs to MongoDB ObjectIds while preserving old values in `legacy_*` fields.
+
+```bash
+# Preview only (no writes)
+node migrations/2026_fix_objectid_relations.js --dry-run
+
+# Apply changes after dry-run is clean
+node migrations/2026_fix_objectid_relations.js --apply
+```
+
+If ambiguous mappings are detected, the script exits with a non-zero code and does not apply updates.
 ```
 
 ## Running Locally with Frontend

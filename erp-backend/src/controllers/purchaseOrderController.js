@@ -3,7 +3,7 @@ const { success, error } = require('../utils/response');
 
 exports.getPurchaseOrders = async (req, res) => {
   try {
-    const orders = await PurchaseOrder.find().populate('supplierId');
+    const orders = await PurchaseOrder.find().populate({ path: 'supplierId', select: 'name email phone' });
     return success(res, orders, 'Purchase orders fetched successfully');
   } catch (requestError) {
     return error(res, requestError.message, 500);
@@ -12,7 +12,7 @@ exports.getPurchaseOrders = async (req, res) => {
 
 exports.getPurchaseOrder = async (req, res) => {
   try {
-    const order = await PurchaseOrder.findById(req.params.id).populate('supplierId items.productId');
+    const order = await PurchaseOrder.findById(req.params.id).populate({ path: 'supplierId', select: 'name email phone' }).populate({ path: 'items.productId', select: 'name sku stockQuantity' });
     if (!order) {
       return error(res, 'Purchase Order not found', 404);
     }

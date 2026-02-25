@@ -7,7 +7,7 @@ const { success, error } = require('../utils/response');
 
 exports.getSalesOrders = async (req, res) => {
   try {
-    const orders = await SalesOrder.find().populate('customerId items.productId');
+    const orders = await SalesOrder.find().populate({ path: 'customerId', select: 'name email' }).populate({ path: 'items.productId', select: 'name sku stockQuantity' });
     return success(res, orders, 'Sales orders fetched successfully');
   } catch (requestError) {
     return error(res, requestError.message, 500);
@@ -16,7 +16,7 @@ exports.getSalesOrders = async (req, res) => {
 
 exports.getSalesOrder = async (req, res) => {
   try {
-    const order = await SalesOrder.findById(req.params.id).populate('customerId items.productId');
+    const order = await SalesOrder.findById(req.params.id).populate({ path: 'customerId', select: 'name email' }).populate({ path: 'items.productId', select: 'name sku stockQuantity' });
     if (!order) {
       return error(res, 'Sales Order not found', 404);
     }

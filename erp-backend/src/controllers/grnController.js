@@ -6,7 +6,7 @@ const { success, error } = require('../utils/response');
 
 exports.getGRNs = async (req, res) => {
   try {
-    const grns = await GRN.find().populate('purchaseOrderId');
+    const grns = await GRN.find().populate({ path: 'purchaseOrderId', select: 'supplierId supplierName status totalAmount createdAt' });
     return success(res, grns, 'GRNs fetched successfully');
   } catch (requestError) {
     return error(res, requestError.message, 500);
@@ -15,7 +15,7 @@ exports.getGRNs = async (req, res) => {
 
 exports.getGRN = async (req, res) => {
   try {
-    const grn = await GRN.findById(req.params.id).populate('purchaseOrderId items.productId');
+    const grn = await GRN.findById(req.params.id).populate({ path: 'purchaseOrderId', select: 'supplierId supplierName status totalAmount createdAt' }).populate({ path: 'items.productId', select: 'name sku stockQuantity' });
     if (!grn) {
       return error(res, 'GRN not found', 404);
     }

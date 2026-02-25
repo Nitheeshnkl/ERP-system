@@ -5,7 +5,7 @@ const { success, error } = require('../utils/response');
 
 exports.getInvoices = async (req, res) => {
   try {
-    const invoices = await Invoice.find().populate('salesOrderId');
+    const invoices = await Invoice.find().populate({ path: 'salesOrderId', select: 'customerId customerName totalAmount status createdAt' });
     return success(res, invoices, 'Invoices fetched successfully');
   } catch (requestError) {
     return error(res, requestError.message, 500);
@@ -14,7 +14,7 @@ exports.getInvoices = async (req, res) => {
 
 exports.getInvoiceById = async (req, res) => {
   try {
-    const invoice = await Invoice.findById(req.params.id).populate('salesOrderId');
+    const invoice = await Invoice.findById(req.params.id).populate({ path: 'salesOrderId', select: 'customerId customerName totalAmount status createdAt' });
     if (!invoice) {
       return error(res, 'Invoice not found', 404);
     }
@@ -43,7 +43,7 @@ exports.updateInvoiceStatus = async (req, res) => {
       req.params.id,
       { paymentStatus: normalizedStatus },
       { new: true }
-    ).populate('salesOrderId');
+    ).populate({ path: 'salesOrderId', select: 'customerId customerName totalAmount status createdAt' });
 
     if (!invoice) {
       return error(res, 'Invoice not found', 404);

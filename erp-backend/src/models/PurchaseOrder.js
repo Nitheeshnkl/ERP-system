@@ -2,8 +2,12 @@ const mongoose = require('mongoose');
 
 const purchaseOrderSchema = new mongoose.Schema({
   supplierId: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier', required: true },
+  legacy_supplierId: { type: String, default: null },
+  supplierName: { type: String },
   items: [{
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+    legacy_productId: { type: String, default: null },
+    productName: { type: String },
     quantity: { type: Number, required: true, min: 1 },
     unitPrice: { type: Number, required: true, min: 0 }
   }],
