@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Alert, IconButton, Snackbar, Stack, TextField } from '@mui/material'
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material'
+import { useForm } from 'react-hook-form'
 import { AppDispatch, RootState } from '../app/store'
 import { hasAnyRole } from '../utils/roleUtils'
 import PageLayout from '../components/shared/PageLayout'
@@ -24,6 +25,7 @@ export default function Suppliers() {
   const dispatch = useDispatch<AppDispatch>()
   const { user } = useSelector((state: RootState) => state.auth)
   const { items, meta, loading } = useSelector((state: RootState) => state.suppliers)
+  const { register, reset, handleSubmit, formState: { errors } } = useForm<SupplierForm>({ defaultValues: initialForm })
 
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
@@ -32,7 +34,6 @@ export default function Suppliers() {
   const [openDelete, setOpenDelete] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [form, setForm] = useState<SupplierForm>(initialForm)
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
@@ -50,13 +51,13 @@ export default function Suppliers() {
 
   const openCreate = () => {
     setEditingId(null)
-    setForm(initialForm)
+    reset(initialForm)
     setOpenForm(true)
   }
 
   const openEdit = (row: any) => {
     setEditingId(row.id)
-    setForm({
+    reset({
       name: row.name || '',
       email: row.email || '',
       phone: row.phone || '',
@@ -65,12 +66,7 @@ export default function Suppliers() {
     setOpenForm(true)
   }
 
-  const onSubmit = async () => {
-    if (!form.name || !form.email) {
-      setSnackbar({ open: true, message: 'Name and email are required', severity: 'error' })
-      return
-    }
-
+  const onSubmit = async (form: SupplierForm) => {
     try {
       if (editingId) {
         await dispatch(updateSupplier({ id: editingId, payload: form })).unwrap()
@@ -167,13 +163,13 @@ export default function Suppliers() {
         open={openForm}
         title={editingId ? 'Edit Supplier' : 'Add Supplier'}
         onClose={() => setOpenForm(false)}
-        onSubmit={onSubmit}
+        onSubmit={handleSubmit(onSubmit)}
       >
         <Stack spacing={2} mt={1}>
-          <TextField label="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <TextField label="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          <TextField label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-          <TextField label="Address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+          <TextField label="Name" error={!!errors.name} helperText={errors.name?.message} {...register('name', { required: 'Name is required' })} />
+          <TextField label="Email" error={!!errors.email} helperText={errors.email?.message} {...register('email', { required: 'Email is required' })} />
+          <TextField label="Phone" {...register('phone')} />
+          <TextField label="Address" {...register('address')} />
         </Stack>
       </FormModal>
 
