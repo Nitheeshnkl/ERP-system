@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { cachedGet, invalidateCacheByPrefix } from '../../services/cachedApi'
 import axiosInstance from '../../services/axiosInstance'
 
 type Customer = {
@@ -36,7 +37,7 @@ const normalize = (c: any): Customer => ({
 export const fetchCustomers = createAsyncThunk(
   'customers/fetch',
   async (params: { page?: number; limit?: number; search?: string }) => {
-    const res: any = await axiosInstance.get('/customers', { params })
+    const res: any = await cachedGet('/customers', params)
     return {
       items: (res.data || []).map(normalize),
       meta: res.meta || initialState.meta,
@@ -46,16 +47,19 @@ export const fetchCustomers = createAsyncThunk(
 
 export const createCustomer = createAsyncThunk('customers/create', async (payload: Partial<Customer>) => {
   const res: any = await axiosInstance.post('/customers', payload)
+  invalidateCacheByPrefix('/customers::')
   return normalize(res.data)
 })
 
 export const updateCustomer = createAsyncThunk('customers/update', async ({ id, payload }: { id: string; payload: Partial<Customer> }) => {
   const res: any = await axiosInstance.put(`/customers/${id}`, payload)
+  invalidateCacheByPrefix('/customers::')
   return normalize(res.data)
 })
 
 export const deleteCustomer = createAsyncThunk('customers/delete', async (id: string) => {
   await axiosInstance.delete(`/customers/${id}`)
+  invalidateCacheByPrefix('/customers::')
   return id
 })
 

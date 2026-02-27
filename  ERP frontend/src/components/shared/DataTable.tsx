@@ -1,5 +1,6 @@
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { Paper } from '@mui/material'
+import { memo } from 'react'
 
 interface DataTableProps<T extends { id: string }> {
   rows: T[]
@@ -11,7 +12,7 @@ interface DataTableProps<T extends { id: string }> {
   onPaginationModelChange: (model: GridPaginationModel) => void
 }
 
-export default function DataTable<T extends { id: string }>({
+function DataTable<T extends { id: string }>({
   rows,
   columns,
   loading = false,
@@ -37,3 +38,5 @@ export default function DataTable<T extends { id: string }>({
     </Paper>
   )
 }
+
+export default memo(DataTable) as typeof DataTable
