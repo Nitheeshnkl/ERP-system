@@ -1,248 +1,197 @@
-import { useState } from 'react'
-import { useSelector } from 'react-redux'
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
-  Chip,
-} from '@mui/material'
-import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material'
-import { RootState } from '../app/store'
+import { useEffect, useMemo, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Alert, IconButton, Snackbar, Stack, TextField } from '@mui/material'
+import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
+import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material'
+import { AppDispatch, RootState } from '../app/store'
 import { hasAnyRole } from '../utils/roleUtils'
+import PageLayout from '../components/shared/PageLayout'
+import DataTable from '../components/shared/DataTable'
+import FormModal from '../components/shared/FormModal'
+import ConfirmDialog from '../components/shared/ConfirmDialog'
+import { createSupplier, deleteSupplier, fetchSuppliers, updateSupplier } from '../features/suppliers/suppliersSlice'
 
-interface Supplier {
-  id: string
+type SupplierForm = {
   name: string
   email: string
   phone: string
   address: string
-  rating: number
 }
 
-const mockSuppliers: Supplier[] = [
-  {
-    id: '1',
-    name: 'Premium Suppliers',
-    email: 'contact@premium.com',
-    phone: '+1-555-1001',
-    address: '123 Business St, NY',
-    rating: 4.5,
-  },
-  {
-    id: '2',
-    name: 'Quality Materials Inc',
-    email: 'sales@quality.com',
-    phone: '+1-555-1002',
-    address: '456 Industrial Ave, CA',
-    rating: 4.2,
-  },
-  {
-    id: '3',
-    name: 'Direct Trade Partners',
-    email: 'trade@directpartners.com',
-    phone: '+1-555-1003',
-    address: '789 Commerce Blvd, TX',
-    rating: 4.8,
-  },
-  {
-    id: '4',
-    name: 'Bulk Distributors',
-    email: 'bulk@distributors.com',
-    phone: '+1-555-1004',
-    address: '321 Wholesale Rd, FL',
-    rating: 3.9,
-  },
-  {
-    id: '5',
-    name: 'Reliable Traders',
-    email: 'info@reliable.com',
-    phone: '+1-555-1005',
-    address: '654 Supply Chain Way, OH',
-    rating: 4.6,
-  },
-]
+const initialForm: SupplierForm = { name: '', email: '', phone: '', address: '' }
 
 export default function Suppliers() {
+  const dispatch = useDispatch<AppDispatch>()
   const { user } = useSelector((state: RootState) => state.auth)
-  const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers)
-  const [openDialog, setOpenDialog] = useState(false)
-  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null)
-  const [formData, setFormData] = useState<Omit<Supplier, 'id'>>({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    rating: 0,
+  const { items, meta, loading } = useSelector((state: RootState) => state.suppliers)
+
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
+  const [search, setSearch] = useState('')
+  const [openForm, setOpenForm] = useState(false)
+  const [openDelete, setOpenDelete] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [form, setForm] = useState<SupplierForm>(initialForm)
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+    open: false,
+    message: '',
+    severity: 'success',
   })
 
-  // Check permissions - suppliers are admin+purchase (case-insensitive)
   const canCreateEdit = hasAnyRole(user?.role, ['Admin', 'Purchase'])
   const canDelete = hasAnyRole(user?.role, ['Admin'])
 
-  const handleOpenDialog = (supplier?: Supplier) => {
-    if (supplier) {
-      setEditingSupplier(supplier)
-      setFormData(supplier)
-    } else {
-      setEditingSupplier(null)
-      setFormData({ name: '', email: '', phone: '', address: '', rating: 0 })
-    }
-    setOpenDialog(true)
+  const load = () => dispatch(fetchSuppliers({ page, limit, search }))
+
+  useEffect(() => {
+    load()
+  }, [dispatch, page, limit, search])
+
+  const openCreate = () => {
+    setEditingId(null)
+    setForm(initialForm)
+    setOpenForm(true)
   }
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false)
-    setEditingSupplier(null)
+  const openEdit = (row: any) => {
+    setEditingId(row.id)
+    setForm({
+      name: row.name || '',
+      email: row.email || '',
+      phone: row.phone || '',
+      address: row.address || '',
+    })
+    setOpenForm(true)
   }
 
-  const handleSave = () => {
-    if (!formData.name || !formData.email) {
-      alert('Name and Email are required')
+  const onSubmit = async () => {
+    if (!form.name || !form.email) {
+      setSnackbar({ open: true, message: 'Name and email are required', severity: 'error' })
       return
     }
 
-    if (editingSupplier) {
-      setSuppliers(
-        suppliers.map((s) => (s.id === editingSupplier.id ? { ...editingSupplier, ...formData } : s))
-      )
-    } else {
-      setSuppliers([...suppliers, { id: Date.now().toString(), ...formData }])
+    try {
+      if (editingId) {
+        await dispatch(updateSupplier({ id: editingId, payload: form })).unwrap()
+        setSnackbar({ open: true, message: 'Supplier updated', severity: 'success' })
+      } else {
+        await dispatch(createSupplier(form)).unwrap()
+        setSnackbar({ open: true, message: 'Supplier created', severity: 'success' })
+      }
+      setOpenForm(false)
+      load()
+    } catch (e: any) {
+      setSnackbar({ open: true, message: e.message || 'Operation failed', severity: 'error' })
     }
-    handleCloseDialog()
   }
 
-  const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this supplier?')) {
-      setSuppliers(suppliers.filter((s) => s.id !== id))
+  const askDelete = (id: string) => {
+    setDeletingId(id)
+    setOpenDelete(true)
+  }
+
+  const onDelete = async () => {
+    if (!deletingId) return
+    try {
+      await dispatch(deleteSupplier(deletingId)).unwrap()
+      setSnackbar({ open: true, message: 'Supplier deleted', severity: 'success' })
+      setOpenDelete(false)
+      setDeletingId(null)
+      load()
+    } catch (e: any) {
+      setSnackbar({ open: true, message: e.message || 'Delete failed', severity: 'error' })
     }
+  }
+
+  const columns: GridColDef[] = useMemo(
+    () => [
+      { field: 'name', headerName: 'Name', flex: 1.2, minWidth: 180 },
+      { field: 'email', headerName: 'Email', flex: 1.4, minWidth: 220 },
+      { field: 'phone', headerName: 'Phone', flex: 1, minWidth: 140 },
+      { field: 'address', headerName: 'Address', flex: 1.5, minWidth: 220 },
+      {
+        field: 'actions',
+        headerName: 'Actions',
+        width: 120,
+        sortable: false,
+        renderCell: (params) => (
+          <>
+            {canCreateEdit && (
+              <IconButton size="small" onClick={() => openEdit(params.row)}>
+                <EditIcon fontSize="small" />
+              </IconButton>
+            )}
+            {canDelete && (
+              <IconButton size="small" onClick={() => askDelete(params.row.id)}>
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            )}
+          </>
+        ),
+      },
+    ],
+    [canCreateEdit, canDelete]
+  )
+
+  const onPageChange = (model: GridPaginationModel) => {
+    setPage(model.page + 1)
+    setLimit(model.pageSize)
   }
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-          Suppliers
-        </Typography>
-        {canCreateEdit && (
-          <Button startIcon={<AddIcon />} variant="contained" onClick={() => handleOpenDialog()}>
-            Add Supplier
-          </Button>
-        )}
-      </Box>
+    <PageLayout title="Suppliers" actionLabel={canCreateEdit ? 'Add Supplier' : undefined} onAction={openCreate}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={2}>
+        <TextField
+          size="small"
+          label="Search"
+          value={search}
+          onChange={(e) => {
+            setPage(1)
+            setSearch(e.target.value)
+          }}
+        />
+      </Stack>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Phone</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Address</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Rating</TableCell>
-              <TableCell sx={{ fontWeight: 700 }} align="right">
-                Actions
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {suppliers.map((supplier) => (
-              <TableRow key={supplier.id} hover>
-                <TableCell>{supplier.name}</TableCell>
-                <TableCell>{supplier.email}</TableCell>
-                <TableCell>{supplier.phone}</TableCell>
-                <TableCell>{supplier.address}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={`${supplier.rating} ⭐`}
-                    color={supplier.rating >= 4.5 ? 'success' : supplier.rating >= 4 ? 'info' : 'warning'}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell align="right">
-                  {canCreateEdit && (
-                    <IconButton
-                      size="small"
-                      onClick={() => handleOpenDialog(supplier)}
-                      title="Edit"
-                    >
-                      <EditIcon />
-                    </IconButton>
-                  )}
-                  {canDelete && (
-                    <IconButton size="small" onClick={() => handleDelete(supplier.id)} title="Delete">
-                      <DeleteIcon />
-                    </IconButton>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <DataTable
+        rows={items}
+        columns={columns}
+        loading={loading}
+        page={meta.page || page}
+        pageSize={meta.pageSize || limit}
+        rowCount={meta.total || 0}
+        onPaginationModelChange={onPageChange}
+      />
 
-      {/* Add/Edit Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingSupplier ? 'Edit Supplier' : 'Add New Supplier'}</DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
-          <TextField
-            fullWidth
-            label="Name"
-            margin="normal"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            label="Email"
-            type="email"
-            margin="normal"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            label="Phone"
-            margin="normal"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            label="Address"
-            margin="normal"
-            value={formData.address}
-            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            label="Rating (0-5)"
-            type="number"
-            margin="normal"
-            inputProps={{ min: 0, max: 5, step: 0.1 }}
-            value={formData.rating}
-            onChange={(e) => setFormData({ ...formData, rating: parseFloat(e.target.value) })}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained">
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+      <FormModal
+        open={openForm}
+        title={editingId ? 'Edit Supplier' : 'Add Supplier'}
+        onClose={() => setOpenForm(false)}
+        onSubmit={onSubmit}
+      >
+        <Stack spacing={2} mt={1}>
+          <TextField label="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <TextField label="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <TextField label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          <TextField label="Address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+        </Stack>
+      </FormModal>
+
+      <ConfirmDialog
+        open={openDelete}
+        title="Delete Supplier"
+        description="This action cannot be undone. Do you want to continue?"
+        onCancel={() => setOpenDelete(false)}
+        onConfirm={onDelete}
+      />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+      >
+        <Alert severity={snackbar.severity} variant="filled">{snackbar.message}</Alert>
+      </Snackbar>
+    </PageLayout>
   )
 }

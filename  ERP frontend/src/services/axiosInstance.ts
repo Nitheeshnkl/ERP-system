@@ -7,30 +7,25 @@ const axiosInstance = axios.create({
   withCredentials: true,
 })
 
-// Request interceptor to add JWT token
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('auth_token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+axiosInstance.interceptors.response.use(
+  (response) => {
+    const payload = response.data
+    if (payload && typeof payload === 'object' && 'success' in payload) {
+      if (payload.success === false) {
+        return Promise.reject(new Error(payload.message || 'Request failed'))
+      }
+      return {
+        ...response,
+        data: payload.data,
+        message: payload.message,
+        meta: payload.meta,
+      }
     }
-    return config
+    return response
   },
   (error) => {
-    return Promise.reject(error)
-  }
-)
-
-// Response interceptor for handling errors
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Token invalid/expired - redirect to login
-      localStorage.removeItem('auth_token')
-      window.location.href = '/login'
-    }
-    return Promise.reject(error)
+    const message = error?.response?.data?.message || error?.message || 'Request failed'
+    return Promise.reject(new Error(message))
   }
 )
 
