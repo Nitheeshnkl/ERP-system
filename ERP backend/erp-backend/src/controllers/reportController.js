@@ -1,3 +1,4 @@
+const ExcelJS = require('exceljs');
 const SalesOrder = require('../models/SalesOrder');
 const Invoice = require('../models/Invoice');
 const { error } = require('../utils/response');
@@ -24,10 +25,26 @@ const streamCsv = async (res, fileName, headers, cursor, mapDocumentToRow) => {
   res.end();
 };
 
+const streamXlsx = async (res, fileName, worksheetName, headers, cursor, mapDocumentToRow) => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet(worksheetName);
+  worksheet.addRow(headers);
+
+  for await (const doc of cursor) {
+    worksheet.addRow(mapDocumentToRow(doc));
+  }
+
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+  await workbook.xlsx.write(res);
+  res.end();
+};
+
 exports.exportSalesCsv = async (req, res) => {
   try {
-    if ((req.query.format || '').toLowerCase() !== 'csv') {
-      return error(res, 'Only csv format is supported', 400);
+    const format = (req.query.format || 'csv').toLowerCase();
+    if (!['csv', 'xlsx'].includes(format)) {
+      return error(res, 'Only csv or xlsx format is supported', 400);
     }
 
     const cursor = SalesOrder.find()
@@ -36,21 +53,22 @@ exports.exportSalesCsv = async (req, res) => {
       .lean()
       .cursor();
 
-    await streamCsv(
-      res,
-      'sales-report.csv',
-      ['orderId', 'customerId', 'customerName', 'status', 'totalAmount', 'createdAt', 'updatedAt'],
-      cursor,
-      (order) => [
-        order._id,
-        order.customerId || '',
-        order.customerName || '',
-        order.status || '',
-        order.totalAmount || 0,
-        order.createdAt ? new Date(order.createdAt).toISOString() : '',
-        order.updatedAt ? new Date(order.updatedAt).toISOString() : ''
-      ]
-    );
+    const headers = ['orderId', 'customerId', 'customerName', 'status', 'totalAmount', 'createdAt', 'updatedAt'];
+    const mapper = (order) => [
+      String(order._id || ''),
+      String(order.customerId || ''),
+      String(order.customerName || ''),
+      String(order.status || ''),
+      Number(order.totalAmount || 0),
+      order.createdAt ? new Date(order.createdAt).toISOString() : '',
+      order.updatedAt ? new Date(order.updatedAt).toISOString() : ''
+    ];
+
+    if (format === 'xlsx') {
+      return streamXlsx(res, 'sales-report.xlsx', 'Sales', headers, cursor, mapper);
+    }
+
+    return streamCsv(res, 'sales-report.csv', headers, cursor, mapper);
   } catch (requestError) {
     if (!res.headersSent) {
       return error(res, requestError.message, 500);
@@ -61,8 +79,9 @@ exports.exportSalesCsv = async (req, res) => {
 
 exports.exportInvoicesCsv = async (req, res) => {
   try {
-    if ((req.query.format || '').toLowerCase() !== 'csv') {
-      return error(res, 'Only csv format is supported', 400);
+    const format = (req.query.format || 'csv').toLowerCase();
+    if (!['csv', 'xlsx'].includes(format)) {
+      return error(res, 'Only csv or xlsx format is supported', 400);
     }
 
     const cursor = Invoice.find()
@@ -71,20 +90,21 @@ exports.exportInvoicesCsv = async (req, res) => {
       .lean()
       .cursor();
 
-    await streamCsv(
-      res,
-      'invoices-report.csv',
-      ['invoiceId', 'salesOrderId', 'amount', 'paymentStatus', 'createdAt', 'updatedAt'],
-      cursor,
-      (invoice) => [
-        invoice._id,
-        invoice.salesOrderId || '',
-        invoice.amount || 0,
-        invoice.paymentStatus || 'Pending',
-        invoice.createdAt ? new Date(invoice.createdAt).toISOString() : '',
-        invoice.updatedAt ? new Date(invoice.updatedAt).toISOString() : ''
-      ]
-    );
+    const headers = ['invoiceId', 'salesOrderId', 'amount', 'paymentStatus', 'createdAt', 'updatedAt'];
+    const mapper = (invoice) => [
+      String(invoice._id || ''),
+      String(invoice.salesOrderId || ''),
+      Number(invoice.amount || 0),
+      String(invoice.paymentStatus || 'Pending'),
+      invoice.createdAt ? new Date(invoice.createdAt).toISOString() : '',
+      invoice.updatedAt ? new Date(invoice.updatedAt).toISOString() : ''
+    ];
+
+    if (format === 'xlsx') {
+      return streamXlsx(res, 'invoices-report.xlsx', 'Invoices', headers, cursor, mapper);
+    }
+
+    return streamCsv(res, 'invoices-report.csv', headers, cursor, mapper);
   } catch (requestError) {
     if (!res.headersSent) {
       return error(res, requestError.message, 500);

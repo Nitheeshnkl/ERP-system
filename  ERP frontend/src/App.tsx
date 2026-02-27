@@ -5,6 +5,7 @@ import { RootState, AppDispatch } from './app/store'
 import { checkAuth } from './features/auth/authSlice'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import { initSocketClient } from './services/socketClient'
 
 const Auth = lazy(() => import('./pages/Auth'))
 const Unauthorized = lazy(() => import('./pages/Unauthorized'))
@@ -23,6 +24,7 @@ function App() {
 
   useEffect(() => {
     dispatch(checkAuth())
+    initSocketClient().catch(() => {})
   }, [dispatch])
 
   if (loading) {

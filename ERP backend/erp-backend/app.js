@@ -75,6 +75,17 @@ const PORT = process.env.PORT || 5000;
 if (process.env.NODE_ENV !== 'test') {
   connectDB().then(() => {
     server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    if (process.env.ENABLE_SOCKET_IO === 'true') {
+      try {
+        const { initSocket } = require('./src/socket');
+        initSocket(server);
+        console.log('Socket.io scaffold enabled');
+      } catch (socketError) {
+        console.error('Socket.io scaffold failed to initialize:', socketError.message);
+      }
+    } else {
+      console.log('Socket.io scaffold disabled');
+    }
   });
 }
 
