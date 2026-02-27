@@ -1,0 +1,33 @@
+RBAC FINAL REPORT
+=================
+
+1. ROLES ENFORCED
+- Admin
+- Sales
+- Purchase
+- Inventory
+
+2. BACKEND SOURCE OF TRUTH
+- All protected APIs require authentication middleware.
+- Route-level role checks are enforced through role middleware.
+- Frontend role checks are visibility/usability only and do not replace backend authorization.
+
+3. ADMIN ROLE PROTECTION (PRODUCTION RULE)
+- Admin role assignment is protected in two layers:
+  1) `ensureAdminAssignsAdminRole` middleware on registration route.
+  2) Existing controller-level verification in auth registration logic.
+- Result: Admin role can only be assigned by an already authenticated Admin user.
+- Public signup cannot create Admin users.
+
+4. INVOICE/RBAC COVERAGE
+- Invoice listing and detail endpoints are restricted to Admin and Sales roles.
+- Invoice status update endpoint is restricted to Admin and Sales roles.
+- Invoice delete remains Admin-only.
+
+5. REPORTS/RBAC COVERAGE
+- Sales report CSV export endpoint is restricted to Admin, Sales, Purchase.
+- Invoice report CSV export endpoint is restricted to Admin, Sales, Purchase.
+
+6. CONFIRMATION
+- Admin role protection is active and enforced server-side.
+- RBAC rules remain backward-compatible with existing modules.
