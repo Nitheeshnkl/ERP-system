@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { success, error } = require('../utils/response');
+const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
 
 exports.register = async (req, res) => {
   try {
@@ -31,7 +32,7 @@ exports.register = async (req, res) => {
 
       let decoded;
       try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
+        decoded = jwt.verify(token, JWT_SECRET);
       } catch (_tokenError) {
         return error(res, 'Admin accounts cannot be created via public signup', 403);
       }
@@ -90,7 +91,7 @@ exports.login = async (req, res) => {
       return error(res, 'Invalid credentials', 401);
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
     res.cookie('token', token, {
       httpOnly: true,
