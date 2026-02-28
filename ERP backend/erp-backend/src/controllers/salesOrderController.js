@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const SalesOrder = require('../models/SalesOrder');
 const Product = require('../models/Product');
 const Invoice = require('../models/Invoice');
@@ -52,19 +51,8 @@ exports.createSalesOrder = async (req, res) => {
 };
 
 exports.updateSalesOrder = async (req, res) => {
-  let session = null;
-  let useTransaction = false;
   try {
-    session = await mongoose.startSession();
-    try {
-      session.startTransaction();
-      useTransaction = true;
-    } catch (_transactionError) {
-      useTransaction = false;
-    }
-
-    const orderQuery = SalesOrder.findById(req.params.id);
-    const order = useTransaction ? await orderQuery.session(session) : await orderQuery;
+    const order = await SalesOrder.findById(req.params.id);
     if (!order) {
       throw new Error('Order not found');
     }
@@ -75,18 +63,17 @@ exports.updateSalesOrder = async (req, res) => {
     if (req.body.items) order.items = req.body.items;
     if (req.body.totalAmount) order.totalAmount = req.body.totalAmount;
 
-    await order.save(useTransaction ? { session } : undefined);
+    await order.save();
 
     if (oldStatus !== 'Completed' && order.status === 'Completed') {
       for (const item of order.items) {
-        const productQuery = Product.findById(item.productId);
-        const product = useTransaction ? await productQuery.session(session) : await productQuery;
+        const product = await Product.findById(item.productId);
         if (!product) throw new Error(`Product not found: ${item.productId}`);
         if (product.stockQuantity < item.quantity) {
           throw new Error(`Insufficient stock for product ${product.name}`);
         }
         product.stockQuantity -= item.quantity;
-        await product.save(useTransaction ? { session } : undefined);
+        await product.save();
       }
 
       const pdfPath = await generateInvoicePDF(order);
@@ -95,20 +82,11 @@ exports.updateSalesOrder = async (req, res) => {
         amount: order.totalAmount,
         pdfPath
       });
-      await invoice.save(useTransaction ? { session } : undefined);
-    }
-
-    if (useTransaction) {
-      await session.commitTransaction();
-      session.endSession();
+      await invoice.save();
     }
 
     return success(res, order, 'Sales order updated successfully');
   } catch (requestError) {
-    if (session && useTransaction) {
-      await session.abortTransaction();
-      session.endSession();
-    }
     return error(res, requestError.message, 400);
   }
 };
