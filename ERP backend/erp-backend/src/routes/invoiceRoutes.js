@@ -12,6 +12,6 @@ router.patch('/:id/status', checkRole('Admin', 'Sales'), invoiceController.updat
 router.get('/:id/pdf', checkRole('Admin', 'Sales'), invoiceController.getInvoicePDF);
 
 // Delete Invoice: admin only
-router.delete('/:id', checkRole('Admin'), invoiceController.deleteInvoice || invoiceController.getInvoices);
+router.delete('/:id', checkRole('Admin'), invoiceController.deleteInvoice);
 
 module.exports = router;

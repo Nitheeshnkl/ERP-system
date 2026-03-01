@@ -72,7 +72,7 @@ const seedDemoMetadata = async () => {
 
 const connectDB = async () => {
   try {
-    const dbUri = process.env.MONGODB_URI || process.env.DB_URI || 'mongodb://127.0.0.1:27017/erp';
+    const dbUri = process.env.MONGODB_URI || process.env.DB_URI || process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/erp';
     const conn = await mongoose.connect(dbUri);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
 
@@ -82,9 +82,10 @@ const connectDB = async () => {
     } else {
       console.log('Demo credential seeding disabled');
     }
+    return conn;
   } catch (connectError) {
-    console.error(`Error: ${connectError.message}`);
-    process.exit(1);
+    console.error(`MongoDB connection error: ${connectError.message}`);
+    throw connectError;
   }
 };
 

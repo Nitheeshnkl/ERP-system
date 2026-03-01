@@ -4,6 +4,44 @@ const Invoice = require('../models/Invoice');
 const { generateInvoicePDF } = require('../utils/pdfGenerator');
 const { success, error } = require('../utils/response');
 const { getPaginationOptions, buildSearchFilter, buildMeta } = require('../utils/pagination');
+const { resolveCustomer, resolveProduct } = require('../utils/orderResolvers');
+
+const normalizeSalesOrderPayload = async (payload) => {
+  const customer = await resolveCustomer(payload.customerId || payload.customerName);
+  const incomingItems = Array.isArray(payload.items) ? payload.items : [];
+  if (incomingItems.length === 0) {
+    throw new Error('At least one order item is required');
+  }
+
+  const normalizedItems = [];
+  for (const item of incomingItems) {
+    const product = await resolveProduct(item.productId || item.productName);
+    const quantity = Number(item.quantity);
+    const unitPrice = Number(item.unitPrice || product.price || 0);
+    if (!quantity || quantity < 1) {
+      throw new Error('Each item must include a quantity of at least 1');
+    }
+
+    normalizedItems.push({
+      productId: product._id,
+      legacy_productId: String(item.productId || item.productName || ''),
+      productName: product.name,
+      quantity,
+      unitPrice,
+    });
+  }
+
+  const totalAmount = Number(payload.totalAmount) || normalizedItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+
+  return {
+    customerId: customer._id,
+    legacy_customerId: String(payload.customerId || payload.customerName || ''),
+    customerName: customer.name,
+    items: normalizedItems,
+    totalAmount,
+    status: payload.status || 'Pending',
+  };
+};
 
 exports.getSalesOrders = async (req, res) => {
   try {
@@ -42,7 +80,8 @@ exports.getSalesOrder = async (req, res) => {
 
 exports.createSalesOrder = async (req, res) => {
   try {
-    const order = new SalesOrder(req.body);
+    const normalizedPayload = await normalizeSalesOrderPayload(req.body);
+    const order = new SalesOrder(normalizedPayload);
     await order.save();
     return success(res, order, 'Sales order created successfully', 201);
   } catch (requestError) {
@@ -57,11 +96,24 @@ exports.updateSalesOrder = async (req, res) => {
       throw new Error('Order not found');
     }
 
+    const hasItemsOrCustomerUpdate = Boolean(req.body.customerId || req.body.customerName || req.body.items);
+    if (hasItemsOrCustomerUpdate) {
+      const normalizedPayload = await normalizeSalesOrderPayload({
+        ...order.toObject(),
+        ...req.body,
+      });
+      order.customerId = normalizedPayload.customerId;
+      order.legacy_customerId = normalizedPayload.legacy_customerId;
+      order.customerName = normalizedPayload.customerName;
+      order.items = normalizedPayload.items;
+      order.totalAmount = normalizedPayload.totalAmount;
+    }
+
     const oldStatus = order.status;
     order.status = req.body.status || order.status;
-
-    if (req.body.items) order.items = req.body.items;
-    if (req.body.totalAmount) order.totalAmount = req.body.totalAmount;
+    if (req.body.totalAmount && !hasItemsOrCustomerUpdate) {
+      order.totalAmount = Number(req.body.totalAmount);
+    }
 
     await order.save();
 

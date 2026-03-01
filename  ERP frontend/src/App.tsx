@@ -1,8 +1,8 @@
 import { Suspense, lazy, useEffect } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState, AppDispatch } from './app/store'
-import { checkAuth } from './features/auth/authSlice'
+import { checkAuth, forceLogout } from './features/auth/authSlice'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import { initSocketClient } from './services/socketClient'
@@ -20,12 +20,23 @@ const Invoices = lazy(() => import('./pages/Invoices'))
 
 function App() {
   const dispatch = useDispatch<AppDispatch>()
+  const navigate = useNavigate()
   const { loading } = useSelector((state: RootState) => state.auth)
 
   useEffect(() => {
     dispatch(checkAuth())
     initSocketClient().catch(() => {})
-  }, [dispatch])
+
+    const onUnauthorized = () => {
+      dispatch(forceLogout())
+      navigate('/login', { replace: true })
+    }
+
+    window.addEventListener('auth:unauthorized', onUnauthorized)
+    return () => {
+      window.removeEventListener('auth:unauthorized', onUnauthorized)
+    }
+  }, [dispatch, navigate])
 
   if (loading) {
     return <div style={{ display: 'grid', placeItems: 'center', height: '100vh' }}>Loading...</div>
