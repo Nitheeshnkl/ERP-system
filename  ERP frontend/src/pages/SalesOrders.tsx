@@ -34,6 +34,7 @@ export default function SalesOrders() {
   const { user } = useSelector((state: RootState) => state.auth)
   const [openDialog, setOpenDialog] = useState(false)
   const [editingOrder, setEditingOrder] = useState<any>(null)
+  const [validationError, setValidationError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     orderNumber: '',
     customerId: '',
@@ -54,6 +55,7 @@ export default function SalesOrders() {
   }, [dispatch])
 
   const handleOpenDialog = (order?: any) => {
+    setValidationError(null)
     if (order) {
       setEditingOrder(order)
       setFormData({
@@ -85,14 +87,16 @@ export default function SalesOrders() {
   const handleCloseDialog = () => {
     setOpenDialog(false)
     setEditingOrder(null)
+    setValidationError(null)
   }
 
   const handleSave = () => {
     if (!formData.customerId || !formData.productId) {
-      alert('Customer and Product are required')
+      setValidationError('Customer and Product are required')
       return
     }
 
+    setValidationError(null)
     // Send the values with both ID and name fields to support free-text input
     const payload = {
       orderNumber: formData.orderNumber,
@@ -133,9 +137,9 @@ export default function SalesOrders() {
 
   return (
     <Box>
-      {error && (
-        <Alert severity="error" onClose={() => dispatch(clearError())} sx={{ mb: 3 }}>
-          {error}
+      {(error || validationError) && (
+        <Alert severity="error" onClose={() => { dispatch(clearError()); setValidationError(null) }} sx={{ mb: 3 }}>
+          {error || validationError}
         </Alert>
       )}
 
