@@ -97,6 +97,10 @@ exports.updateSalesOrder = async (req, res) => {
     }
 
     const hasItemsOrCustomerUpdate = Boolean(req.body.customerId || req.body.customerName || req.body.items);
+    if (order.status === 'Completed' && hasItemsOrCustomerUpdate) {
+      return error(res, 'Completed orders cannot be edited', 400);
+    }
+
     if (hasItemsOrCustomerUpdate) {
       const normalizedPayload = await normalizeSalesOrderPayload({
         ...order.toObject(),
@@ -110,31 +114,57 @@ exports.updateSalesOrder = async (req, res) => {
     }
 
     const oldStatus = order.status;
-    order.status = req.body.status || order.status;
+    const nextStatus = req.body.status || order.status;
+
     if (req.body.totalAmount && !hasItemsOrCustomerUpdate) {
       order.totalAmount = Number(req.body.totalAmount);
     }
 
-    await order.save();
+    if (oldStatus !== 'Completed' && nextStatus === 'Completed') {
+      const decrementedItems = [];
 
-    if (oldStatus !== 'Completed' && order.status === 'Completed') {
-      for (const item of order.items) {
-        const product = await Product.findById(item.productId);
-        if (!product) throw new Error(`Product not found: ${item.productId}`);
-        if (product.stockQuantity < item.quantity) {
-          throw new Error(`Insufficient stock for product ${product.name}`);
+      try {
+        for (const item of order.items) {
+          const updatedProduct = await Product.findOneAndUpdate(
+            { _id: item.productId, stockQuantity: { $gte: item.quantity } },
+            { $inc: { stockQuantity: -item.quantity } },
+            { new: true }
+          );
+
+          if (!updatedProduct) {
+            const product = await Product.findById(item.productId).select('name');
+            const productName = product?.name || String(item.productId);
+            throw new Error(`Insufficient stock for product ${productName}`);
+          }
+
+          decrementedItems.push({ productId: item.productId, quantity: item.quantity });
         }
-        product.stockQuantity -= item.quantity;
-        await product.save();
-      }
 
-      const pdfPath = await generateInvoicePDF(order);
-      const invoice = new Invoice({
-        salesOrderId: order._id,
-        amount: order.totalAmount,
-        pdfPath
-      });
-      await invoice.save();
+        order.status = nextStatus;
+        await order.save();
+
+        const pdfPath = await generateInvoicePDF(order);
+        await Invoice.findOneAndUpdate(
+          { salesOrderId: order._id },
+          {
+            salesOrderId: order._id,
+            amount: order.totalAmount,
+            pdfPath,
+            legacy_salesOrderId: String(order._id),
+          },
+          { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
+      } catch (requestError) {
+        for (const item of decrementedItems) {
+          await Product.findByIdAndUpdate(item.productId, { $inc: { stockQuantity: item.quantity } });
+        }
+        order.status = oldStatus;
+        await order.save();
+        throw requestError;
+      }
+    } else {
+      order.status = nextStatus;
+      await order.save();
     }
 
     return success(res, order, 'Sales order updated successfully');

@@ -4,6 +4,63 @@ const PurchaseOrder = require('../models/PurchaseOrder');
 const Product = require('../models/Product');
 const { success, error } = require('../utils/response');
 
+const isTransactionNotSupportedError = (requestError) => {
+  const message = String(requestError?.message || '');
+  return message.includes('Transaction numbers are only allowed on a replica set member or mongos')
+    || message.toLowerCase().includes('replica set');
+};
+
+const persistGRN = async (payload, session) => {
+  const { purchaseOrderId, items } = payload;
+
+  if (!purchaseOrderId) {
+    throw new Error('purchaseOrderId is required');
+  }
+
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error('At least one GRN item is required');
+  }
+
+  const poQuery = PurchaseOrder.findById(purchaseOrderId);
+  const po = session ? await poQuery.session(session) : await poQuery;
+  if (!po) {
+    throw new Error('Purchase Order not found');
+  }
+
+  for (const item of items) {
+    const receivedQuantity = Number(item.receivedQuantity);
+    if (!item.productId || !receivedQuantity || receivedQuantity < 1) {
+      throw new Error('Each GRN item must include productId and receivedQuantity >= 1');
+    }
+
+    const productUpdate = Product.findByIdAndUpdate(
+      item.productId,
+      { $inc: { stockQuantity: receivedQuantity } },
+      { new: true }
+    );
+    const updatedProduct = session ? await productUpdate.session(session) : await productUpdate;
+    if (!updatedProduct) {
+      throw new Error(`Product not found: ${item.productId}`);
+    }
+  }
+
+  po.status = 'Received';
+  if (session) {
+    await po.save({ session });
+  } else {
+    await po.save();
+  }
+
+  const grn = new GRN({ purchaseOrderId, items });
+  if (session) {
+    await grn.save({ session });
+  } else {
+    await grn.save();
+  }
+
+  return grn;
+};
+
 exports.getGRNs = async (req, res) => {
   try {
     const grns = await GRN.find().populate({ path: 'purchaseOrderId', select: 'supplierId supplierName status totalAmount createdAt' });
@@ -26,49 +83,41 @@ exports.getGRN = async (req, res) => {
 };
 
 exports.createGRN = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  let session = null;
+
   try {
-    const { purchaseOrderId, items } = req.body;
+    session = await mongoose.startSession();
+    session.startTransaction();
 
-    const grn = new GRN({ purchaseOrderId, items });
-    await grn.save({ session });
-
-    const po = await PurchaseOrder.findById(purchaseOrderId).session(session);
-    if (!po) {
-      throw new Error('Purchase Order not found');
-    }
-    po.status = 'Received';
-    await po.save({ session });
-
-    for (const item of items) {
-      const product = await Product.findById(item.productId).session(session);
-      if (!product) {
-        throw new Error(`Product not found: ${item.productId}`);
-      }
-      product.stockQuantity += item.receivedQuantity;
-      await product.save({ session });
-    }
+    const grn = await persistGRN(req.body, session);
 
     await session.commitTransaction();
-    session.endSession();
-
     return success(res, grn, 'GRN created successfully', 201);
   } catch (requestError) {
-    await session.abortTransaction();
-    session.endSession();
+    if (session) {
+      try {
+        await session.abortTransaction();
+      } catch (_abortError) {
+        // Ignore abort errors and continue error fallback path
+      }
+    }
 
-    if (requestError.message.includes('Transaction')) {
-      console.error('Transactions not supported on this MongoDB instance.');
-      return error(
-        res,
-        'Transaction failed, MongoDB replica set required for full safety.',
-        500,
-        { reason: requestError.message }
-      );
+    if (isTransactionNotSupportedError(requestError)) {
+      try {
+        const grn = await persistGRN(req.body);
+        return success(res, grn, 'GRN created successfully', 201, {
+          transactionFallback: true,
+        });
+      } catch (fallbackError) {
+        return error(res, fallbackError.message, 400);
+      }
     }
 
     return error(res, requestError.message, 400);
+  } finally {
+    if (session) {
+      session.endSession();
+    }
   }
 };
 
