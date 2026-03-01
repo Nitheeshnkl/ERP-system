@@ -34,66 +34,14 @@ const normalizeProduct = (apiProduct: any, fallback?: Partial<Product>): Product
   reorderLevel: apiProduct.reorderLevel ?? fallback?.reorderLevel ?? 0,
 })
 
-export const fetchProducts = createAsyncThunk('products/fetchProducts', async () => {
+export const fetchProducts = createAsyncThunk('products/fetchProducts', async (_, { rejectWithValue }) => {
   try {
     const response = await axiosInstance.get('/products')
     // Transform _id to id for MUI DataGrid compatibility
     // Map backend fields (stockQuantity) to frontend fields (stock)
     return response.data.map((product: any) => normalizeProduct(product))
   } catch (error: any) {
-    // Fallback to mock data
-    return [
-      {
-        id: '1',
-        name: 'Laptop Computer',
-        sku: 'LP-001',
-        description: 'Professional laptop for enterprise use',
-        price: 1200,
-        stock: 15,
-        reorderLevel: 20,
-        unit: 'pcs',
-      },
-      {
-        id: '2',
-        name: 'Office Chair',
-        sku: 'OC-002',
-        description: 'Ergonomic office chair',
-        price: 450,
-        stock: 45,
-        reorderLevel: 30,
-        unit: 'pcs',
-      },
-      {
-        id: '3',
-        name: 'Printer Paper',
-        sku: 'PP-003',
-        description: 'A4 white printer paper (500 sheets)',
-        price: 8,
-        stock: 18,
-        reorderLevel: 50,
-        unit: 'reams',
-      },
-      {
-        id: '4',
-        name: 'Monitor 27 inch',
-        sku: 'MN-004',
-        description: 'LED Monitor 27 inch Full HD',
-        price: 350,
-        stock: 22,
-        reorderLevel: 25,
-        unit: 'pcs',
-      },
-      {
-        id: '5',
-        name: 'Keyboard Mechanical',
-        sku: 'KB-005',
-        description: 'RGB Mechanical Keyboard',
-        price: 150,
-        stock: 35,
-        reorderLevel: 20,
-        unit: 'pcs',
-      },
-    ]
+    return rejectWithValue(error.response?.data?.message || 'Failed to fetch products')
   }
 })
 

@@ -21,11 +21,6 @@ const initialState: AuthState = {
 
 export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { rejectWithValue }) => {
   try {
-    const token = localStorage.getItem(TOKEN_KEY)
-    if (!token) {
-      return rejectWithValue('No token provided')
-    }
-
     const response = await axiosInstance.get('/auth/me')
     return response.data
   } catch (error: unknown) {
