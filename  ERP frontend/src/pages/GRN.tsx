@@ -28,7 +28,9 @@ export default function GRN() {
   }, [dispatch])
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (String(status || '').toLowerCase()) {
+      case 'received':
+      case 'completed':
       case 'verified':
         return 'success'
       case 'pending':
@@ -82,14 +84,24 @@ export default function GRN() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {grns.map((grn: any) => (
-                <TableRow key={grn.id} hover>
-                  <TableCell sx={{ fontWeight: 600 }}>{grn.grnNumber}</TableCell>
-                  <TableCell>{grn.poNumber}</TableCell>
-                  <TableCell>{grn.receivedDate}</TableCell>
-                  <TableCell>{grn.totalItems}</TableCell>
+              {grns.map((grn: any) => {
+                const id = grn?._id || grn?.id || '-'
+                const poRef = grn?.purchaseOrderId
+                const poNumber = poRef?._id ? String(poRef._id).slice(-6).toUpperCase() : '-'
+                const receivedDate = grn?.createdAt ? String(grn.createdAt).split('T')[0] : '-'
+                const totalItems = Array.isArray(grn?.items)
+                  ? grn.items.reduce((sum: number, item: any) => sum + Number(item?.receivedQuantity || 0), 0)
+                  : 0
+                const status = poRef?.status || 'Received'
+
+                return (
+                <TableRow key={id} hover>
+                  <TableCell sx={{ fontWeight: 600 }}>{`GRN-${String(id).slice(-6).toUpperCase()}`}</TableCell>
+                  <TableCell>{`PO-${poNumber}`}</TableCell>
+                  <TableCell>{receivedDate}</TableCell>
+                  <TableCell>{totalItems}</TableCell>
                   <TableCell>
-                    <Chip label={grn.status} color={getStatusColor(grn.status)} size="small" />
+                    <Chip label={status} color={getStatusColor(status)} size="small" />
                   </TableCell>
                   <TableCell align="right">
                     <IconButton size="small" title="View Details">
@@ -100,7 +112,8 @@ export default function GRN() {
                     </IconButton>
                   </TableCell>
                 </TableRow>
-              ))}
+                )
+              })}
             </TableBody>
           </Table>
         </TableContainer>

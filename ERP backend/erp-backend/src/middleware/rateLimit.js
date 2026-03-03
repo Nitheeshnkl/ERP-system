@@ -11,6 +11,7 @@ const apiRateLimiter = rateLimit({
   max: perMinuteMax,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.path === '/auth/logout' || req.path === '/health' || req.path === '/ready',
   handler: toRateLimitHandler('Too many requests. Please try again shortly.')
 });
 

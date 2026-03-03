@@ -1,0 +1,467 @@
+{
+  "generatedAt": "2026-03-02T14:52:53.004Z",
+  "summary": {
+    "adminTokenRole": "Admin",
+    "salesTokenRole": "Sales",
+    "purchaseTokenRole": "Purchase",
+    "expectedMatrix": {
+      "admin_create_sales_order": 201,
+      "admin_create_purchase_order": 201,
+      "sales_create_sales_order": 201,
+      "sales_create_purchase_order": 403,
+      "purchase_create_purchase_order": 201,
+      "purchase_create_sales_order": 403
+    },
+    "actualMatrix": {
+      "admin_create_sales_order": 201,
+      "admin_create_purchase_order": 201,
+      "sales_create_sales_order": 201,
+      "sales_create_purchase_order": 403,
+      "purchase_create_purchase_order": 201,
+      "purchase_create_sales_order": 403
+    }
+  },
+  "steps": [
+    {
+      "name": "login_admin",
+      "status": 200,
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/auth/login",
+        "body": {
+          "email": "admin@erp.local",
+          "password": "password123"
+        }
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTU5NzI3NjA3MTEwODg5YzM1OGExMyIsInJvbGUiOiJBZG1pbiIsInR2IjowLCJpYXQiOjE3NzI0NjMxNzIsImV4cCI6MTc3MzA2Nzk3Mn0.twx1jEKPl9WHu2wkTm8UBPpEBYUEL-ol5KjwADhLCIs",
+          "user": {
+            "id": "69a59727607110889c358a13",
+            "name": "Demo Admin",
+            "email": "admin@erp.local",
+            "role": "Admin"
+          }
+        },
+        "message": "Logged in successfully"
+      }
+    },
+    {
+      "name": "create_supplier_admin",
+      "status": 201,
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/suppliers",
+        "body": {
+          "name": "RBAC Supplier 1772463172633-6972",
+          "email": "rbac.supplier.1772463172633-6972@example.com",
+          "phone": "7777777777",
+          "address": "RBAC address"
+        }
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "name": "RBAC Supplier 1772463172633-6972",
+          "email": "rbac.supplier.1772463172633-6972@example.com",
+          "phone": "7777777777",
+          "address": "RBAC address",
+          "city": "",
+          "state": "",
+          "country": "",
+          "postalCode": "",
+          "_id": "69a5a444b940d49001d92c01",
+          "createdAt": "2026-03-02T14:52:52.765Z",
+          "updatedAt": "2026-03-02T14:52:52.765Z",
+          "__v": 0
+        },
+        "message": "Supplier created successfully"
+      }
+    },
+    {
+      "name": "create_product_admin",
+      "status": 201,
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/products",
+        "body": {
+          "name": "RBAC Product 1772463172633-6972",
+          "sku": "RBAC-1772463172633-6972",
+          "price": 199,
+          "stockQuantity": 40
+        }
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "name": "RBAC Product 1772463172633-6972",
+          "sku": "RBAC-1772463172633-6972",
+          "price": 199,
+          "stockQuantity": 40,
+          "_id": "69a5a444b940d49001d92c04",
+          "createdAt": "2026-03-02T14:52:52.768Z",
+          "updatedAt": "2026-03-02T14:52:52.768Z",
+          "__v": 0
+        },
+        "message": "Product created successfully"
+      }
+    },
+    {
+      "name": "create_customer_admin",
+      "status": 201,
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/customers",
+        "body": {
+          "name": "RBAC Customer 1772463172633-6972",
+          "email": "rbac.customer.1772463172633-6972@example.com",
+          "phone": "8888888888",
+          "address": "RBAC customer address"
+        }
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "name": "RBAC Customer 1772463172633-6972",
+          "email": "rbac.customer.1772463172633-6972@example.com",
+          "phone": "8888888888",
+          "address": "RBAC customer address",
+          "_id": "69a5a444b940d49001d92c07",
+          "createdAt": "2026-03-02T14:52:52.771Z",
+          "updatedAt": "2026-03-02T14:52:52.771Z",
+          "__v": 0
+        },
+        "message": "Customer created successfully"
+      }
+    },
+    {
+      "name": "register_sales",
+      "status": 201,
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/auth/register",
+        "body": {
+          "name": "RBAC Sales",
+          "email": "rbac.sales.1772463172633-6972@example.com",
+          "password": "password123",
+          "role": "Sales"
+        }
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "id": "69a5a444b940d49001d92c0a",
+          "name": "RBAC Sales",
+          "email": "rbac.sales.1772463172633-6972@example.com",
+          "role": "Sales"
+        },
+        "message": "User registered successfully"
+      }
+    },
+    {
+      "name": "login_sales",
+      "status": 200,
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/auth/login",
+        "body": {
+          "email": "rbac.sales.1772463172633-6972@example.com",
+          "password": "password123"
+        }
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTVhNDQ0Yjk0MGQ0OTAwMWQ5MmMwYSIsInJvbGUiOiJTYWxlcyIsInR2IjowLCJpYXQiOjE3NzI0NjMxNzIsImV4cCI6MTc3MzA2Nzk3Mn0.ZCAv9e5nUtq_yseDpdetOqlMOnaMqwbXcBeVrlLQZyU",
+          "user": {
+            "id": "69a5a444b940d49001d92c0a",
+            "name": "RBAC Sales",
+            "email": "rbac.sales.1772463172633-6972@example.com",
+            "role": "Sales"
+          }
+        },
+        "message": "Logged in successfully"
+      }
+    },
+    {
+      "name": "register_purchase",
+      "status": 201,
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/auth/register",
+        "body": {
+          "name": "RBAC Purchase",
+          "email": "rbac.purchase.1772463172633-6972@example.com",
+          "password": "password123",
+          "role": "Purchase"
+        }
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "id": "69a5a444b940d49001d92c0e",
+          "name": "RBAC Purchase",
+          "email": "rbac.purchase.1772463172633-6972@example.com",
+          "role": "Purchase"
+        },
+        "message": "User registered successfully"
+      }
+    },
+    {
+      "name": "login_purchase",
+      "status": 200,
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/auth/login",
+        "body": {
+          "email": "rbac.purchase.1772463172633-6972@example.com",
+          "password": "password123"
+        }
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTVhNDQ0Yjk0MGQ0OTAwMWQ5MmMwZSIsInJvbGUiOiJQdXJjaGFzZSIsInR2IjowLCJpYXQiOjE3NzI0NjMxNzIsImV4cCI6MTc3MzA2Nzk3Mn0.7WvVvsn2Q-WOBmo1OM3Si3-SCy0DgRDqO7SCEeq4fKU",
+          "user": {
+            "id": "69a5a444b940d49001d92c0e",
+            "name": "RBAC Purchase",
+            "email": "rbac.purchase.1772463172633-6972@example.com",
+            "role": "Purchase"
+          }
+        },
+        "message": "Logged in successfully"
+      }
+    },
+    {
+      "name": "admin_create_sales_order",
+      "status": 201,
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/sales-orders",
+        "body": {
+          "customerId": "69a5a444b940d49001d92c07",
+          "items": [
+            {
+              "productId": "69a5a444b940d49001d92c04",
+              "quantity": 2,
+              "unitPrice": 199
+            }
+          ],
+          "totalAmount": 398,
+          "status": "Pending"
+        }
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "customerId": "69a5a444b940d49001d92c07",
+          "legacy_customerId": "69a5a444b940d49001d92c07",
+          "customerName": "RBAC Customer 1772463172633-6972",
+          "items": [
+            {
+              "productId": "69a5a444b940d49001d92c04",
+              "legacy_productId": "69a5a444b940d49001d92c04",
+              "productName": "RBAC Product 1772463172633-6972",
+              "quantity": 2,
+              "unitPrice": 199,
+              "_id": "69a5a444b940d49001d92c15"
+            }
+          ],
+          "totalAmount": 398,
+          "status": "Pending",
+          "_id": "69a5a444b940d49001d92c14",
+          "createdAt": "2026-03-02T14:52:52.992Z",
+          "updatedAt": "2026-03-02T14:52:52.992Z",
+          "__v": 0
+        },
+        "message": "Sales order created successfully"
+      }
+    },
+    {
+      "name": "admin_create_purchase_order",
+      "status": 201,
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/purchase-orders",
+        "body": {
+          "supplierId": "69a5a444b940d49001d92c01",
+          "items": [
+            {
+              "productId": "69a5a444b940d49001d92c04",
+              "quantity": 3,
+              "unitPrice": 150
+            }
+          ],
+          "totalAmount": 450,
+          "status": "Pending"
+        }
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "supplierId": "69a5a444b940d49001d92c01",
+          "legacy_supplierId": "69a5a444b940d49001d92c01",
+          "supplierName": "RBAC Supplier 1772463172633-6972",
+          "items": [
+            {
+              "productId": "69a5a444b940d49001d92c04",
+              "legacy_productId": "69a5a444b940d49001d92c04",
+              "productName": "RBAC Product 1772463172633-6972",
+              "quantity": 3,
+              "unitPrice": 150,
+              "_id": "69a5a444b940d49001d92c1b"
+            }
+          ],
+          "totalAmount": 450,
+          "status": "Pending",
+          "_id": "69a5a444b940d49001d92c1a",
+          "createdAt": "2026-03-02T14:52:52.996Z",
+          "updatedAt": "2026-03-02T14:52:52.996Z",
+          "__v": 0
+        },
+        "message": "Purchase order created successfully"
+      }
+    },
+    {
+      "name": "sales_create_sales_order",
+      "status": 201,
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/sales-orders",
+        "body": {
+          "customerId": "69a5a444b940d49001d92c07",
+          "items": [
+            {
+              "productId": "69a5a444b940d49001d92c04",
+              "quantity": 2,
+              "unitPrice": 199
+            }
+          ],
+          "totalAmount": 398,
+          "status": "Pending"
+        }
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "customerId": "69a5a444b940d49001d92c07",
+          "legacy_customerId": "69a5a444b940d49001d92c07",
+          "customerName": "RBAC Customer 1772463172633-6972",
+          "items": [
+            {
+              "productId": "69a5a444b940d49001d92c04",
+              "legacy_productId": "69a5a444b940d49001d92c04",
+              "productName": "RBAC Product 1772463172633-6972",
+              "quantity": 2,
+              "unitPrice": 199,
+              "_id": "69a5a444b940d49001d92c21"
+            }
+          ],
+          "totalAmount": 398,
+          "status": "Pending",
+          "_id": "69a5a444b940d49001d92c20",
+          "createdAt": "2026-03-02T14:52:52.999Z",
+          "updatedAt": "2026-03-02T14:52:52.999Z",
+          "__v": 0
+        },
+        "message": "Sales order created successfully"
+      }
+    },
+    {
+      "name": "sales_create_purchase_order",
+      "status": 403,
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/purchase-orders",
+        "body": {
+          "supplierId": "69a5a444b940d49001d92c01",
+          "items": [
+            {
+              "productId": "69a5a444b940d49001d92c04",
+              "quantity": 3,
+              "unitPrice": 150
+            }
+          ],
+          "totalAmount": 450,
+          "status": "Pending"
+        }
+      },
+      "body": {
+        "success": false,
+        "data": null,
+        "message": "Forbidden: Insufficient privileges"
+      }
+    },
+    {
+      "name": "purchase_create_purchase_order",
+      "status": 201,
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/purchase-orders",
+        "body": {
+          "supplierId": "69a5a444b940d49001d92c01",
+          "items": [
+            {
+              "productId": "69a5a444b940d49001d92c04",
+              "quantity": 3,
+              "unitPrice": 150
+            }
+          ],
+          "totalAmount": 450,
+          "status": "Pending"
+        }
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "supplierId": "69a5a444b940d49001d92c01",
+          "legacy_supplierId": "69a5a444b940d49001d92c01",
+          "supplierName": "RBAC Supplier 1772463172633-6972",
+          "items": [
+            {
+              "productId": "69a5a444b940d49001d92c04",
+              "legacy_productId": "69a5a444b940d49001d92c04",
+              "productName": "RBAC Product 1772463172633-6972",
+              "quantity": 3,
+              "unitPrice": 150,
+              "_id": "69a5a445b940d49001d92c28"
+            }
+          ],
+          "totalAmount": 450,
+          "status": "Pending",
+          "_id": "69a5a445b940d49001d92c27",
+          "createdAt": "2026-03-02T14:52:53.002Z",
+          "updatedAt": "2026-03-02T14:52:53.002Z",
+          "__v": 0
+        },
+        "message": "Purchase order created successfully"
+      }
+    },
+    {
+      "name": "purchase_create_sales_order",
+      "status": 403,
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/sales-orders",
+        "body": {
+          "customerId": "69a5a444b940d49001d92c07",
+          "items": [
+            {
+              "productId": "69a5a444b940d49001d92c04",
+              "quantity": 2,
+              "unitPrice": 199
+            }
+          ],
+          "totalAmount": 398,
+          "status": "Pending"
+        }
+      },
+      "body": {
+        "success": false,
+        "data": null,
+        "message": "Forbidden: Insufficient privileges"
+      }
+    }
+  ]
+}

@@ -8,6 +8,7 @@ const connectDB = require('./src/config/db');
 const { success, error } = require('./src/utils/response');
 const { notFoundHandler, errorHandler } = require('./src/middleware/errorHandler');
 const { apiRateLimiter } = require('./src/middleware/rateLimit');
+const { swaggerUi, swaggerSpec } = require('./src/config/swagger');
 
 // Route imports
 const authRoutes = require('./src/routes/authRoutes');
@@ -23,15 +24,73 @@ const reportRoutes = require('./src/routes/reportRoutes');
 
 const app = express();
 let server;
+let isShuttingDown = false;
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+];
+
+if (process.env.CLIENT_URL) {
+  allowedOrigins.push(process.env.CLIENT_URL.trim());
+}
+
+if (process.env.CLIENT_URLS) {
+  process.env.CLIENT_URLS
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+    .forEach((origin) => allowedOrigins.push(origin));
+}
+
+const uniqueAllowedOrigins = [...new Set(allowedOrigins)];
+const corsOptionsDelegate = (req, callback) => {
+  const requestOrigin = req.header('Origin');
+  const corsOptions = {
+    origin: false,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  };
+
+  if (!requestOrigin || uniqueAllowedOrigins.includes(requestOrigin)) {
+    corsOptions.origin = true;
+  }
+
+  callback(null, corsOptions);
+};
+
+const validateEnv = () => {
+  const missing = [];
+  const hasMongoUri = Boolean(
+    (process.env.MONGODB_URI || '').trim() ||
+    (process.env.DB_URI || '').trim() ||
+    (process.env.MONGO_URI || '').trim()
+  );
+
+  if (!hasMongoUri) {
+    missing.push('MONGODB_URI (or DB_URI / MONGO_URI)');
+  }
+
+  if (!(process.env.JWT_SECRET || '').trim()) {
+    missing.push('JWT_SECRET');
+  }
+
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variable(s): ${missing.join(', ')}`);
+  }
+};
 
 // Middleware
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true
-}));
 app.use(express.json());
+app.use(cors(corsOptionsDelegate));
+app.options('*', cors(corsOptionsDelegate));
 app.use(cookieParser());
+app.use((req, _res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+});
 
 // Public health endpoints for runtime probes
 app.get('/health', (_req, res) => {
@@ -53,6 +112,8 @@ app.get('/ready', (_req, res) => {
   }, 'Readiness check completed');
 });
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // Routes
 app.use('/api', apiRateLimiter);
 app.use('/api/auth', authRoutes);
@@ -70,11 +131,26 @@ app.use('/api/reports', reportRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Connect DB & Start Server
-const PORT = process.env.PORT || 5000;
-if (process.env.NODE_ENV !== 'test') {
-  connectDB().then(() => {
-    server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const PORT = Number(process.env.PORT) || 8000;
+const startServer = async () => {
+  try {
+    validateEnv();
+    await connectDB();
+
+    server = app.listen(PORT, () => {
+      console.log(`ERP backend listening on http://localhost:${PORT}`);
+      console.log(`Allowed CORS origins: ${uniqueAllowedOrigins.join(', ')}`);
+    });
+
+    server.on('error', (listenError) => {
+      if (listenError.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use. Stop the existing process or set a different PORT.`);
+      } else {
+        console.error('Server startup error:', listenError.message);
+      }
+      process.exit(1);
+    });
+
     if (process.env.ENABLE_SOCKET_IO === 'true') {
       try {
         const { initSocket } = require('./src/socket');
@@ -86,25 +162,38 @@ if (process.env.NODE_ENV !== 'test') {
     } else {
       console.log('Socket.io scaffold disabled');
     }
-  });
-}
+  } catch (startupError) {
+    console.error('Startup failed:', startupError.message);
+    process.exit(1);
+  }
+};
 
-const shutdown = (signal) => {
+const shutdown = async (signal) => {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
   console.log(`${signal} received. Shutting down gracefully...`);
-  const closeServer = server
-    ? new Promise((resolve) => server.close(resolve))
-    : Promise.resolve();
 
-  closeServer
-    .then(() => mongoose.connection.close())
-    .then(() => process.exit(0))
-    .catch((closeError) => {
-      console.error('Error during shutdown:', closeError);
-      process.exit(1);
-    });
+  try {
+    if (server) {
+      await new Promise((resolve) => server.close(resolve));
+    }
+
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.connection.close();
+    }
+
+    process.exit(0);
+  } catch (closeError) {
+    console.error('Error during shutdown:', closeError.message);
+    process.exit(1);
+  }
 };
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
+
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 module.exports = app;

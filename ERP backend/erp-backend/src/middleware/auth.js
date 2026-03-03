@@ -1,8 +1,13 @@
 const jwt = require('jsonwebtoken');
 const { error } = require('../utils/response');
-const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
+const User = require('../models/User');
+const { hasRole } = require('../utils/roles');
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET must be defined in environment variables');
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
-exports.checkAuth = (req, res, next) => {
+exports.checkAuth = async (req, res, next) => {
   let token = req.cookies?.token;
 
   if (!token) {
@@ -18,6 +23,19 @@ exports.checkAuth = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(decoded.id).select('tokenVersion');
+    if (!user) {
+      return error(res, 'Unauthorized - User not found', 401);
+    }
+
+    if (Number(user.tokenVersion || 0) < 0) {
+      return error(res, 'Unauthorized - User deactivated', 401);
+    }
+
+    if (Number(decoded.tv || 0) !== Number(user.tokenVersion || 0)) {
+      return error(res, 'Invalid token', 401);
+    }
+
     req.user = decoded;
     return next();
   } catch (authError) {
@@ -30,7 +48,7 @@ exports.checkAuth = (req, res, next) => {
 
 exports.checkRole = (...roles) => {
   return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    if (!req.user || !hasRole(req.user.role, roles)) {
       return error(res, 'Forbidden: Insufficient privileges', 403);
     }
     return next();

@@ -2,3 +2,25 @@
 _backups/
 README 2.md
 RBAC_FINAL_REPORT 2.txt
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+coverage/
+**/coverage/
+.env
+**/.env
+.env.local
+**/.env.local
+.env.*.local
+*.log
+.cache/
+.tmp/
+tmp/
+*.tmp
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.docker/
+*.pid

@@ -10,12 +10,12 @@ if (!value('JWT_SECRET')) {
   missing.push('JWT_SECRET');
 }
 
-if (!value('MONGODB_URI') && !value('DB_URI')) {
-  missing.push('MONGODB_URI (or DB_URI)');
+if (!value('MONGODB_URI') && !value('DB_URI') && !value('MONGO_URI')) {
+  missing.push('MONGODB_URI (or DB_URI / MONGO_URI)');
 }
 
-if (!value('CLIENT_URL')) {
-  missing.push('CLIENT_URL');
+if (!value('CLIENT_URL') && !value('CLIENT_URLS')) {
+  missing.push('CLIENT_URL (or CLIENT_URLS)');
 }
 
 if (value('ENABLE_DEMO_SEEDING') === 'true') {

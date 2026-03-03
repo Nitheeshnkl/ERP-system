@@ -35,6 +35,7 @@ export default function Products() {
   const { user } = useSelector((state: RootState) => state.auth)
   const [openDialog, setOpenDialog] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [validationError, setValidationError] = useState<string | null>(null)
   const [formData, setFormData] = useState<Omit<Product, 'id'>>({
     name: '',
     sku: '',
@@ -63,6 +64,7 @@ export default function Products() {
   })
 
   const handleOpenDialog = (product?: Product) => {
+    setValidationError(null)
     if (product) {
       setEditingProduct(product)
       setFormData(product)
@@ -84,14 +86,16 @@ export default function Products() {
   const handleCloseDialog = () => {
     setOpenDialog(false)
     setEditingProduct(null)
+    setValidationError(null)
   }
 
   const handleSave = () => {
     if (!formData.name || !formData.sku) {
-      alert('Name and SKU are required')
+      setValidationError('Name and SKU are required')
       return
     }
 
+    setValidationError(null)
     if (editingProduct) {
       dispatch(updateProduct({ ...editingProduct, ...formData }))
     } else {
@@ -185,6 +189,12 @@ export default function Products() {
       {error && (
         <Alert severity="error" onClose={() => dispatch(clearError())} sx={{ mb: 2 }}>
           {error}
+        </Alert>
+      )}
+
+      {validationError && (
+        <Alert severity="warning" onClose={() => setValidationError(null)} sx={{ mb: 2 }}>
+          {validationError}
         </Alert>
       )}
 

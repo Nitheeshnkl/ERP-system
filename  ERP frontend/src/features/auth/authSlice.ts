@@ -1,6 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { User } from '../../types/entities'
 import axiosInstance from '../../services/axiosInstance'
+import { getErrorMessage } from '../../utils/errorUtils'
+
+const TOKEN_KEY = 'auth_token'
 
 interface AuthState {
   user: User | null
@@ -18,18 +21,11 @@ const initialState: AuthState = {
 
 export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { rejectWithValue }) => {
   try {
-    // First check if token exists in localStorage
-    const token = localStorage.getItem('auth_token')
-    if (!token) {
-      return rejectWithValue('No token')
-    }
-
-    // Verify token is still valid by calling /me endpoint
     const response = await axiosInstance.get('/auth/me')
     return response.data
-  } catch (error: any) {
-    localStorage.removeItem('auth_token')
-    return rejectWithValue(error.response?.data?.message || 'Not authenticated')
+  } catch (error: unknown) {
+    localStorage.removeItem(TOKEN_KEY)
+    return rejectWithValue(getErrorMessage(error) || 'Not authenticated')
   }
 })
 
@@ -41,9 +37,9 @@ export const register = createAsyncThunk(
   ) => {
     try {
       const response = await axiosInstance.post('/auth/register', { name, email, password, role })
-      return response.data.user
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Registration failed')
+      return response.data
+    } catch (error: unknown) {
+      return rejectWithValue(getErrorMessage(error) || 'Registration failed')
     }
   }
 )
@@ -56,27 +52,26 @@ export const login = createAsyncThunk(
   ) => {
     try {
       const response = await axiosInstance.post('/auth/login', { email, password })
-      // Backend should return JWT token in response
-      const token = response.data.token || response.data.user?.token
+      const token = response.data?.token
       if (token) {
-        localStorage.setItem('auth_token', token)
+        localStorage.setItem(TOKEN_KEY, token)
       }
       return response.data.user
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Login failed')
+    } catch (error: unknown) {
+      return rejectWithValue(getErrorMessage(error) || 'Login failed')
     }
   }
 )
 
-export const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
+export const logout = createAsyncThunk('auth/logout', async () => {
   try {
     await axiosInstance.post('/auth/logout')
-    localStorage.removeItem('auth_token')
+    localStorage.removeItem(TOKEN_KEY)
     return null
-  } catch (error: any) {
-    // Clear token anyway even if logout request fails
-    localStorage.removeItem('auth_token')
-    return rejectWithValue(error.response?.data?.message || 'Logout failed')
+  } catch (error: unknown) {
+    localStorage.removeItem(TOKEN_KEY)
+    // Logout must be idempotent on the client: clear local auth even if server call fails.
+    return null
   }
 })
 
@@ -86,6 +81,12 @@ const authSlice = createSlice({
   reducers: {
     clearError(state) {
       state.error = null
+    },
+    forceLogout(state) {
+      state.user = null
+      state.isAuthenticated = false
+      state.error = null
+      state.loading = false
     },
   },
   extraReducers: (builder) => {
@@ -101,6 +102,7 @@ const authSlice = createSlice({
         state.loading = false
       })
       .addCase(checkAuth.rejected, (state) => {
+        state.user = null
         state.isAuthenticated = false
         state.loading = false
       })
@@ -141,6 +143,7 @@ const authSlice = createSlice({
       .addCase(logout.fulfilled, (state) => {
         state.user = null
         state.isAuthenticated = false
+        state.error = null
         state.loading = false
       })
       .addCase(logout.rejected, (state) => {
@@ -151,5 +154,5 @@ const authSlice = createSlice({
   },
 })
 
-export const { clearError } = authSlice.actions
+export const { clearError, forceLogout } = authSlice.actions
 export default authSlice.reducer

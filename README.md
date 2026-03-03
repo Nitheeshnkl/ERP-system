@@ -1,57 +1,174 @@
 # ERP Management System
 
-Production-ready ERP platform for inventory, purchasing, sales, invoicing, dashboard analytics, and role-based operations.
+Full-stack ERP application for inventory, procurement, sales, invoicing, and operational reporting.
 
-## Features
-- Secure authentication with JWT + cookie support
-- Role-based access control (Admin, Sales, Purchase, Inventory)
-- Product, customer, and supplier management (CRUD)
-- Sales orders and purchase orders workflows
-- GRN (Goods Receipt Note) handling
-- Invoicing with PDF generation and download
-- Dashboard metrics and monthly revenue chart
-- CSV export for sales and invoices reports
+## Project Overview
+This repository contains:
+- Backend API: `ERP backend/erp-backend` (Node.js, Express, MongoDB, Mongoose)
+- Frontend app: ` ERP frontend` (React, Vite, TypeScript, Redux Toolkit, MUI)
 
-## User Roles
-- Admin: full system access, user/role governance, destructive actions
-- Sales: sales orders, invoices, customer-facing operations, sales reports
-- Purchase: purchase orders, suppliers, GRN, purchasing reports
-- Inventory: inventory/product operations and stock-related workflows
+## Tech Stack
+- MongoDB
+- Node.js + Express
+- React + Vite + TypeScript
+- Redux Toolkit
+- Material UI
 
-## Invoicing
-- List invoices: `GET /api/invoices`
-- View invoice JSON by id: `GET /api/invoices/:id`
-- Update payment status: `PATCH /api/invoices/:id/status` with `Paid | Pending | Cancelled`
-- View/download invoice PDF: `GET /api/invoices/:id/pdf`
+## Core Features
+- JWT + cookie-based authentication
+- Role-based access control (`Admin`, `Sales`, `Purchase`, `Inventory`)
+- Product, Customer, Supplier CRUD
+- Sales Orders (multi-line item support)
+- Purchase Orders (multi-line item support)
+- GRN (Goods Receipt Notes)
+- Invoice generation + PDF retrieval
+- Dashboard metrics and chart data
+- CSV exports for reports
 
-Frontend notes:
-- Invoice UI safely maps optional fields and avoids crashes on missing values.
-- View/Download actions are wired directly to PDF endpoints.
+## Roles and Permissions
+- `Admin`: Full access, including delete operations and user listing
+- `Sales`: Customers, Sales Orders, Invoices, Dashboard, Reports
+- `Purchase`: Suppliers, Purchase Orders, GRN, Dashboard, Reports
+- `Inventory`: Products, GRN update, Dashboard
 
-## Reports & Export
-- Sales CSV export: `GET /api/reports/sales?format=csv`
-- Invoices CSV export: `GET /api/reports/invoices?format=csv`
-- Exports stream rows safely from MongoDB cursor to response.
+## Environment Variables
+### Backend (`ERP backend/erp-backend/.env`)
+Required:
+- `MONGODB_URI` (or `DB_URI` / `MONGO_URI`)
+- `JWT_SECRET`
 
-## Deployment Steps
-1. Configure environment variables (`MONGODB_URI`, `JWT_SECRET`, `CLIENT_URL`, `PORT`).
-2. Install dependencies:
-   - Backend: `cd ERP backend/erp-backend && npm install`
-   - Frontend: `cd " ERP frontend" && npm install`
-3. Start MongoDB and backend:
-   - `cd ERP backend/erp-backend && npm start`
-4. Build and serve frontend:
-   - `cd " ERP frontend" && npm run build`
-   - `npm run preview` (or serve `dist` with your web server)
-5. Verify critical flows:
-   - Login
-   - Product CRUD
-   - Sales Order
-   - Purchase Order
-   - Invoice PDF view/download
-   - Dashboard metrics/chart
-   - CSV exports (sales/invoices)
+Common:
+- `PORT=8000`
+- `NODE_ENV=development`
+- `BCRYPT_ROUNDS=10`
+- `CLIENT_URL=http://localhost:5173`
+- `CLIENT_URLS=http://localhost:5173,http://127.0.0.1:5173`
+- `ENABLE_DEMO_SEEDING=false`
+- `DEMO_ADMIN_EMAIL=`
+- `DEMO_ADMIN_PASSWORD=`
 
-## Notes
-- Admin role assignment is protected server-side: only an authenticated Admin can assign Admin role.
-- Demo credentials remain functional for internal testing but are not exposed in frontend UI.
+Template file: `ERP backend/erp-backend/.env.example`
+
+### Frontend (` ERP frontend/.env.local`)
+- `VITE_API_URL=http://localhost:8000`
+- `VITE_API_BASE_URL=http://localhost:8000/api`
+
+Template file: ` ERP frontend/.env.example`
+
+## Setup Instructions
+1. Install backend dependencies:
+```bash
+cd "ERP backend/erp-backend"
+npm install
+```
+2. Install frontend dependencies:
+```bash
+cd "/Users/nitheeshvellaiyan/Desktop/ERP system/ ERP frontend"
+npm install
+```
+3. Configure env files from `.env.example` templates.
+4. Start MongoDB locally.
+
+## Run Instructions
+### Backend
+```bash
+cd "ERP backend/erp-backend"
+npm run dev
+```
+Backend URL: `http://localhost:8000`
+
+### Frontend
+```bash
+cd "/Users/nitheeshvellaiyan/Desktop/ERP system/ ERP frontend"
+npm run dev -- --host 127.0.0.1
+```
+Frontend URL: `http://127.0.0.1:5173`
+
+## API Endpoints Summary
+Base URL: `http://localhost:8000/api`
+
+- Auth: `/auth/*`
+- Products: `/products/*`
+- Customers: `/customers/*`
+- Suppliers: `/suppliers/*`
+- Sales Orders: `/sales-orders/*`
+- Purchase Orders: `/purchase-orders/*`
+- GRN: `/grn/*`
+- Invoices: `/invoices/*`
+- Dashboard: `/dashboard/*`
+- Reports: `/reports/*`
+
+Detailed reference: `API_DOCUMENTATION.md`
+
+## Folder Structure
+```text
+ERP system/
+├── ERP backend/
+│   └── erp-backend/
+│       ├── app.js
+│       ├── package.json
+│       ├── src/
+│       │   ├── config/
+│       │   ├── controllers/
+│       │   ├── middleware/
+│       │   ├── models/
+│       │   ├── routes/
+│       │   ├── services/
+│       │   ├── utils/
+│       │   └── validations/
+│       └── scripts/
+├──  ERP frontend/
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── src/
+│       ├── app/
+│       ├── components/
+│       ├── features/
+│       ├── hooks/
+│       ├── pages/
+│       ├── services/
+│       ├── styles/
+│       ├── types/
+│       └── utils/
+├── scripts/
+└── reports/
+```
+
+## Known Limitations
+- Demo metadata seeding currently logs a validation warning when `password_hint` is not provided by seed payload.
+- Some root-level `scripts/` and `reports/` are operational artifacts (not runtime dependencies) and can be archived after validation.
+
+## Additional Docs
+- `API_DOCUMENTATION.md`
+- `DATABASE_STRUCTURE.md`
+- `CHANGELOG.md`
+
+## Docker
+
+### Build and Run with Docker Compose
+```bash
+docker-compose up --build
+```
+
+### Service Endpoints
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:5000`
+- MongoDB: `mongodb://localhost:27017`
+
+### Stop Services
+```bash
+docker-compose down
+```
+
+## GitHub Actions CI
+
+Workflow file: `.github/workflows/ci.yml`
+
+### Triggers
+- Push to `main`
+- Pull request to `main`
+
+### Jobs
+- Backend: install dependencies and run `npm test`
+- Frontend: install dependencies, run `npm test`, run `npm run type-check`
+- Docker build: build backend and frontend Docker images (validation only, no push)

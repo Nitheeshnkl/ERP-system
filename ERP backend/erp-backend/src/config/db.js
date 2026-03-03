@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const DemoMetadata = require('../models/DemoMetadata');
+const Supplier = require('../models/Supplier');
 
 const getDemoAdminFromEnv = () => ({
   email: process.env.DEMO_ADMIN_EMAIL,
@@ -72,7 +73,7 @@ const seedDemoMetadata = async () => {
 
 const connectDB = async () => {
   try {
-    const dbUri = process.env.MONGODB_URI || process.env.DB_URI || 'mongodb://127.0.0.1:27017/erp';
+    const dbUri = process.env.MONGODB_URI || process.env.DB_URI || process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/erp';
     const conn = await mongoose.connect(dbUri);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
 
@@ -82,9 +83,24 @@ const connectDB = async () => {
     } else {
       console.log('Demo credential seeding disabled');
     }
+
+    try {
+      const supplierIndexes = await Supplier.collection.indexes();
+      const legacyEmailIndex = supplierIndexes.find((idx) => idx.name === 'email_1');
+      const isLegacyEmailIndex = legacyEmailIndex && !legacyEmailIndex.partialFilterExpression;
+      if (isLegacyEmailIndex) {
+        await Supplier.collection.dropIndex('email_1');
+        console.log('Dropped legacy suppliers.email_1 unique index');
+      }
+      await Supplier.syncIndexes();
+    } catch (indexError) {
+      console.error('Supplier index sync warning:', indexError.message);
+    }
+
+    return conn;
   } catch (connectError) {
-    console.error(`Error: ${connectError.message}`);
-    process.exit(1);
+    console.error(`MongoDB connection error: ${connectError.message}`);
+    throw connectError;
   }
 };
 

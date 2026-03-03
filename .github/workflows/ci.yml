@@ -2,8 +2,11 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
 
 jobs:
   backend:
@@ -12,16 +15,21 @@ jobs:
       run:
         working-directory: ./ERP backend/erp-backend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 18
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '18'
+          cache: npm
           cache-dependency-path: ERP backend/erp-backend/package-lock.json
-      - name: Install backend deps
-        run: npm ci
+
+      - name: Install dependencies
+        run: npm install
+
       - name: Run backend tests
-        run: npm test -- --runInBand
+        run: npm test
 
   frontend:
     runs-on: ubuntu-latest
@@ -29,13 +37,34 @@ jobs:
       run:
         working-directory: ./ ERP frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 18
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - name: Install frontend deps
+          node-version: '18'
+          cache: npm
+          cache-dependency-path:  ERP frontend/package-lock.json
+
+      - name: Install dependencies
         run: npm install
-      - name: Type-check frontend
+
+      - name: Run frontend tests
+        run: npm test
+
+      - name: Run frontend type-check
         run: npm run type-check
-      - name: Build frontend
-        run: npm run build
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t erp-backend-test "./ERP backend/erp-backend"
+
+      - name: Build frontend image
+        run: docker build -t erp-frontend-test "./ ERP frontend"
