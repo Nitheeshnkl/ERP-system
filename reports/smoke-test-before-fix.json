@@ -1,0 +1,945 @@
+{
+  "generatedAt": "2026-03-02T14:37:56.340Z",
+  "baseUrl": "http://127.0.0.1:8000",
+  "steps": [
+    {
+      "name": "register_admin",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/auth/register",
+        "payload": {
+          "name": "Smoke Admin",
+          "email": "admin+1772462276340-887@example.com",
+          "password": "password123",
+          "role": "Admin"
+        }
+      },
+      "response": {
+        "status": 403,
+        "body": {
+          "success": false,
+          "data": null,
+          "message": "Admin role assignment requires an authenticated Admin user"
+        }
+      },
+      "validationError": "Admin role assignment requires an authenticated Admin user"
+    },
+    {
+      "name": "login_admin",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/auth/login",
+        "payload": {
+          "email": "admin@erp.local",
+          "password": "password123"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "data": {
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTU5NzI3NjA3MTEwODg5YzM1OGExMyIsInJvbGUiOiJBZG1pbiIsInR2IjowLCJpYXQiOjE3NzI0NjIyNzYsImV4cCI6MTc3MzA2NzA3Nn0.UOqalvTW2SNnyX5ibHsSe6bMV5BiH5hFO71iYmJkb7g",
+            "user": {
+              "id": "69a59727607110889c358a13",
+              "name": "Demo Admin",
+              "email": "admin@erp.local",
+              "role": "Admin"
+            }
+          },
+          "message": "Logged in successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "auth_me_admin",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/auth/me",
+        "payload": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "data": {
+            "_id": "69a59727607110889c358a13",
+            "name": "Demo Admin",
+            "email": "admin@erp.local",
+            "role": "Admin",
+            "createdAt": "2026-03-02T13:56:55.834Z",
+            "updatedAt": "2026-03-02T14:35:04.369Z",
+            "__v": 0,
+            "tokenVersion": 0
+          },
+          "message": "User fetched successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "dashboard_metrics_admin",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/dashboard/metrics",
+        "payload": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "data": {
+            "totalSales": 2500,
+            "pendingOrders": 0,
+            "lowStockAlerts": 0,
+            "activeCustomers": 2
+          },
+          "message": "Dashboard metrics fetched successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "dashboard_chart_admin",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/dashboard/chart",
+        "payload": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "data": [
+            {
+              "month": "Mar",
+              "revenue": 2500
+            }
+          ],
+          "message": "Dashboard chart data fetched successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "create_supplier_admin",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/suppliers",
+        "payload": {
+          "name": "Smoke Supplier 1772462276340-887",
+          "email": "supplier+1772462276340-887@example.com",
+          "phone": "9999999999",
+          "address": "Smoke Address"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "success": true,
+          "data": {
+            "name": "Smoke Supplier 1772462276340-887",
+            "email": "supplier+1772462276340-887@example.com",
+            "phone": "9999999999",
+            "address": "Smoke Address",
+            "_id": "69a5a0c4ec117ddc3544a396",
+            "createdAt": "2026-03-02T14:37:56.511Z",
+            "updatedAt": "2026-03-02T14:37:56.511Z",
+            "__v": 0
+          },
+          "message": "Supplier created successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "create_product_admin",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/products",
+        "payload": {
+          "name": "Smoke Product 1772462276340-887",
+          "sku": "SKU-1772462276340-887",
+          "price": 120,
+          "stockQuantity": 25
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "success": true,
+          "data": {
+            "name": "Smoke Product 1772462276340-887",
+            "sku": "SKU-1772462276340-887",
+            "price": 120,
+            "stockQuantity": 25,
+            "_id": "69a5a0c4ec117ddc3544a399",
+            "createdAt": "2026-03-02T14:37:56.523Z",
+            "updatedAt": "2026-03-02T14:37:56.523Z",
+            "__v": 0
+          },
+          "message": "Product created successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "create_customer_admin",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/customers",
+        "payload": {
+          "name": "Smoke Customer 1772462276340-887",
+          "email": "customer+1772462276340-887@example.com",
+          "phone": "8888888888",
+          "address": "Customer Address"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "success": true,
+          "data": {
+            "name": "Smoke Customer 1772462276340-887",
+            "email": "customer+1772462276340-887@example.com",
+            "phone": "8888888888",
+            "address": "Customer Address",
+            "_id": "69a5a0c4ec117ddc3544a39c",
+            "createdAt": "2026-03-02T14:37:56.531Z",
+            "updatedAt": "2026-03-02T14:37:56.531Z",
+            "__v": 0
+          },
+          "message": "Customer created successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "list_products_admin",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/products",
+        "payload": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "data": [
+            {
+              "_id": "69a5a0c4ec117ddc3544a399",
+              "name": "Smoke Product 1772462276340-887",
+              "sku": "SKU-1772462276340-887",
+              "price": 120,
+              "stockQuantity": 25,
+              "createdAt": "2026-03-02T14:37:56.523Z",
+              "updatedAt": "2026-03-02T14:37:56.523Z",
+              "__v": 0
+            },
+            {
+              "_id": "69a59c0e3547c275adefc1e8",
+              "name": "E2E Product 1772461069566",
+              "sku": "E2E-SKU-1772461069566",
+              "price": 250,
+              "stockQuantity": 107,
+              "createdAt": "2026-03-02T14:17:50.136Z",
+              "updatedAt": "2026-03-02T14:17:50.187Z",
+              "__v": 0
+            },
+            {
+              "_id": "69a59bd53d344839c103b46c",
+              "name": "E2E Product 1772461012823",
+              "sku": "E2E-SKU-1772461012823",
+              "price": 250,
+              "stockQuantity": 107,
+              "createdAt": "2026-03-02T14:16:53.406Z",
+              "updatedAt": "2026-03-02T14:16:53.493Z",
+              "__v": 0
+            }
+          ],
+          "message": "Products fetched successfully",
+          "meta": {
+            "total": 3,
+            "page": 1,
+            "pageSize": 10,
+            "totalPages": 1,
+            "search": ""
+          }
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "list_suppliers_admin",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/suppliers",
+        "payload": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "data": [
+            {
+              "_id": "69a5a0c4ec117ddc3544a396",
+              "name": "Smoke Supplier 1772462276340-887",
+              "email": "supplier+1772462276340-887@example.com",
+              "phone": "9999999999",
+              "address": "Smoke Address",
+              "createdAt": "2026-03-02T14:37:56.511Z",
+              "updatedAt": "2026-03-02T14:37:56.511Z",
+              "__v": 0
+            },
+            {
+              "_id": "69a59c0e3547c275adefc207",
+              "name": "E2E Purchase Supplier 1772461069566",
+              "email": "purchase.supplier.1772461069566@example.com",
+              "phone": "7777777777",
+              "address": "Purchase Address",
+              "createdAt": "2026-03-02T14:17:50.180Z",
+              "updatedAt": "2026-03-02T14:17:50.180Z",
+              "__v": 0
+            },
+            {
+              "_id": "69a59c0e3547c275adefc1e5",
+              "name": "E2E Supplier 1772461069566",
+              "email": "supplier.1772461069566@example.com",
+              "phone": "9999999999",
+              "address": "Test Supplier Address",
+              "createdAt": "2026-03-02T14:17:50.133Z",
+              "updatedAt": "2026-03-02T14:17:50.133Z",
+              "__v": 0
+            },
+            {
+              "_id": "69a59bd53d344839c103b482",
+              "name": "E2E Purchase Supplier 1772461012823",
+              "email": "purchase.supplier.1772461012823@example.com",
+              "phone": "7777777777",
+              "address": "Purchase Address",
+              "createdAt": "2026-03-02T14:16:53.486Z",
+              "updatedAt": "2026-03-02T14:16:53.486Z",
+              "__v": 0
+            },
+            {
+              "_id": "69a59bd53d344839c103b46a",
+              "name": "E2E Supplier 1772461012823",
+              "email": "supplier.1772461012823@example.com",
+              "phone": "9999999999",
+              "address": "Test Supplier Address",
+              "createdAt": "2026-03-02T14:16:53.404Z",
+              "updatedAt": "2026-03-02T14:16:53.404Z",
+              "__v": 0
+            }
+          ],
+          "message": "Suppliers fetched successfully",
+          "meta": {
+            "total": 5,
+            "page": 1,
+            "pageSize": 10,
+            "totalPages": 1,
+            "search": ""
+          }
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "list_customers_admin",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/customers",
+        "payload": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "data": [
+            {
+              "_id": "69a5a0c4ec117ddc3544a39c",
+              "name": "Smoke Customer 1772462276340-887",
+              "email": "customer+1772462276340-887@example.com",
+              "phone": "8888888888",
+              "address": "Customer Address",
+              "createdAt": "2026-03-02T14:37:56.531Z",
+              "updatedAt": "2026-03-02T14:37:56.531Z",
+              "__v": 0
+            },
+            {
+              "_id": "69a59c0e3547c275adefc1eb",
+              "name": "E2E Customer 1772461069566",
+              "email": "customer.1772461069566@example.com",
+              "phone": "8888888888",
+              "address": "Test Customer Address",
+              "createdAt": "2026-03-02T14:17:50.138Z",
+              "updatedAt": "2026-03-02T14:17:50.138Z",
+              "__v": 0
+            },
+            {
+              "_id": "69a59bd53d344839c103b46e",
+              "name": "E2E Customer 1772461012823",
+              "email": "customer.1772461012823@example.com",
+              "phone": "8888888888",
+              "address": "Test Customer Address",
+              "createdAt": "2026-03-02T14:16:53.408Z",
+              "updatedAt": "2026-03-02T14:16:53.408Z",
+              "__v": 0
+            }
+          ],
+          "message": "Customers fetched successfully",
+          "meta": {
+            "total": 3,
+            "page": 1,
+            "pageSize": 10,
+            "totalPages": 1,
+            "search": ""
+          }
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "register_sales",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/auth/register",
+        "payload": {
+          "name": "Smoke Sales",
+          "email": "sales+1772462276340-887@example.com",
+          "password": "password123",
+          "role": "Sales"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "success": true,
+          "data": {
+            "id": "69a5a0c4ec117ddc3544a3a8",
+            "name": "Smoke Sales",
+            "email": "sales+1772462276340-887@example.com",
+            "role": "Sales"
+          },
+          "message": "User registered successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "login_sales",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/auth/login",
+        "payload": {
+          "email": "sales+1772462276340-887@example.com",
+          "password": "password123"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "data": {
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTVhMGM0ZWMxMTdkZGMzNTQ0YTNhOCIsInJvbGUiOiJTYWxlcyIsInR2IjowLCJpYXQiOjE3NzI0NjIyNzYsImV4cCI6MTc3MzA2NzA3Nn0.6g-SfKKR5fF-uK59W-AF_10q2AWsJlnX4bMpjiZy6AQ",
+            "user": {
+              "id": "69a5a0c4ec117ddc3544a3a8",
+              "name": "Smoke Sales",
+              "email": "sales+1772462276340-887@example.com",
+              "role": "Sales"
+            }
+          },
+          "message": "Logged in successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "auth_me_sales",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/auth/me",
+        "payload": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "data": {
+            "_id": "69a5a0c4ec117ddc3544a3a8",
+            "name": "Smoke Sales",
+            "email": "sales+1772462276340-887@example.com",
+            "role": "Sales",
+            "tokenVersion": 0,
+            "createdAt": "2026-03-02T14:37:56.546Z",
+            "updatedAt": "2026-03-02T14:37:56.546Z",
+            "__v": 0
+          },
+          "message": "User fetched successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "create_sales_order_sales",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/sales-orders",
+        "payload": {
+          "customerId": "69a5a0c4ec117ddc3544a39c",
+          "customerName": "69a5a0c4ec117ddc3544a39c",
+          "items": [
+            {
+              "productId": "69a5a0c4ec117ddc3544a399",
+              "productName": "69a5a0c4ec117ddc3544a399",
+              "quantity": 2,
+              "unitPrice": 120
+            }
+          ],
+          "totalAmount": 240,
+          "status": "Pending"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "success": true,
+          "data": {
+            "customerId": "69a5a0c4ec117ddc3544a39c",
+            "legacy_customerId": "69a5a0c4ec117ddc3544a39c",
+            "customerName": "Smoke Customer 1772462276340-887",
+            "items": [
+              {
+                "productId": "69a5a0c4ec117ddc3544a399",
+                "legacy_productId": "69a5a0c4ec117ddc3544a399",
+                "productName": "Smoke Product 1772462276340-887",
+                "quantity": 2,
+                "unitPrice": 120,
+                "_id": "69a5a0c4ec117ddc3544a3b1"
+              }
+            ],
+            "totalAmount": 240,
+            "status": "Pending",
+            "_id": "69a5a0c4ec117ddc3544a3b0",
+            "createdAt": "2026-03-02T14:37:56.663Z",
+            "updatedAt": "2026-03-02T14:37:56.663Z",
+            "__v": 0
+          },
+          "message": "Sales order created successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "register_purchase",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/auth/register",
+        "payload": {
+          "name": "Smoke Purchase",
+          "email": "purchase+1772462276340-887@example.com",
+          "password": "password123",
+          "role": "Purchase"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "success": true,
+          "data": {
+            "id": "69a5a0c4ec117ddc3544a3b4",
+            "name": "Smoke Purchase",
+            "email": "purchase+1772462276340-887@example.com",
+            "role": "Purchase"
+          },
+          "message": "User registered successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "login_purchase",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/auth/login",
+        "payload": {
+          "email": "purchase+1772462276340-887@example.com",
+          "password": "password123"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "data": {
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTVhMGM0ZWMxMTdkZGMzNTQ0YTNiNCIsInJvbGUiOiJQdXJjaGFzZSIsInR2IjowLCJpYXQiOjE3NzI0NjIyNzYsImV4cCI6MTc3MzA2NzA3Nn0.NN_BZ37yTp-zRsvPW7ALVMiGLTtJrjnE_2HXE7tMF4Q",
+            "user": {
+              "id": "69a5a0c4ec117ddc3544a3b4",
+              "name": "Smoke Purchase",
+              "email": "purchase+1772462276340-887@example.com",
+              "role": "Purchase"
+            }
+          },
+          "message": "Logged in successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "auth_me_purchase",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/auth/me",
+        "payload": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "data": {
+            "_id": "69a5a0c4ec117ddc3544a3b4",
+            "name": "Smoke Purchase",
+            "email": "purchase+1772462276340-887@example.com",
+            "role": "Purchase",
+            "tokenVersion": 0,
+            "createdAt": "2026-03-02T14:37:56.667Z",
+            "updatedAt": "2026-03-02T14:37:56.667Z",
+            "__v": 0
+          },
+          "message": "User fetched successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "create_purchase_order_purchase",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/purchase-orders",
+        "payload": {
+          "supplierId": "69a5a0c4ec117ddc3544a396",
+          "supplierName": "69a5a0c4ec117ddc3544a396",
+          "items": [
+            {
+              "productId": "69a5a0c4ec117ddc3544a399",
+              "productName": "69a5a0c4ec117ddc3544a399",
+              "quantity": 3,
+              "unitPrice": 90
+            }
+          ],
+          "totalAmount": 270,
+          "status": "Pending"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "success": true,
+          "data": {
+            "supplierId": "69a5a0c4ec117ddc3544a396",
+            "legacy_supplierId": "69a5a0c4ec117ddc3544a396",
+            "supplierName": "Smoke Supplier 1772462276340-887",
+            "items": [
+              {
+                "productId": "69a5a0c4ec117ddc3544a399",
+                "legacy_productId": "69a5a0c4ec117ddc3544a399",
+                "productName": "Smoke Product 1772462276340-887",
+                "quantity": 3,
+                "unitPrice": 90,
+                "_id": "69a5a0c4ec117ddc3544a3bd"
+              }
+            ],
+            "totalAmount": 270,
+            "status": "Pending",
+            "_id": "69a5a0c4ec117ddc3544a3bc",
+            "createdAt": "2026-03-02T14:37:56.781Z",
+            "updatedAt": "2026-03-02T14:37:56.781Z",
+            "__v": 0
+          },
+          "message": "Purchase order created successfully"
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "list_sales_orders_sales",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/sales-orders",
+        "payload": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "data": [
+            {
+              "_id": "69a5a0c4ec117ddc3544a3b0",
+              "customerId": {
+                "_id": "69a5a0c4ec117ddc3544a39c",
+                "name": "Smoke Customer 1772462276340-887",
+                "email": "customer+1772462276340-887@example.com"
+              },
+              "legacy_customerId": "69a5a0c4ec117ddc3544a39c",
+              "customerName": "Smoke Customer 1772462276340-887",
+              "items": [
+                {
+                  "productId": {
+                    "_id": "69a5a0c4ec117ddc3544a399",
+                    "name": "Smoke Product 1772462276340-887",
+                    "sku": "SKU-1772462276340-887",
+                    "stockQuantity": 25
+                  },
+                  "legacy_productId": "69a5a0c4ec117ddc3544a399",
+                  "productName": "Smoke Product 1772462276340-887",
+                  "quantity": 2,
+                  "unitPrice": 120,
+                  "_id": "69a5a0c4ec117ddc3544a3b1"
+                }
+              ],
+              "totalAmount": 240,
+              "status": "Pending",
+              "createdAt": "2026-03-02T14:37:56.663Z",
+              "updatedAt": "2026-03-02T14:37:56.663Z",
+              "__v": 0
+            },
+            {
+              "_id": "69a59c0e3547c275adefc1fc",
+              "customerId": {
+                "_id": "69a59c0e3547c275adefc1eb",
+                "name": "E2E Customer 1772461069566",
+                "email": "customer.1772461069566@example.com"
+              },
+              "legacy_customerId": "69a59c0e3547c275adefc1eb",
+              "customerName": "E2E Customer 1772461069566",
+              "items": [
+                {
+                  "productId": {
+                    "_id": "69a59c0e3547c275adefc1e8",
+                    "name": "E2E Product 1772461069566",
+                    "sku": "E2E-SKU-1772461069566",
+                    "stockQuantity": 107
+                  },
+                  "legacy_productId": "69a59c0e3547c275adefc1e8",
+                  "productName": "E2E Product 1772461069566",
+                  "quantity": 5,
+                  "unitPrice": 250,
+                  "_id": "69a59c0e3547c275adefc1fd"
+                }
+              ],
+              "totalAmount": 1250,
+              "status": "Completed",
+              "createdAt": "2026-03-02T14:17:50.152Z",
+              "updatedAt": "2026-03-02T14:17:50.156Z",
+              "__v": 0
+            },
+            {
+              "_id": "69a59bd53d344839c103b47a",
+              "customerId": {
+                "_id": "69a59bd53d344839c103b46e",
+                "name": "E2E Customer 1772461012823",
+                "email": "customer.1772461012823@example.com"
+              },
+              "legacy_customerId": "69a59bd53d344839c103b46e",
+              "customerName": "E2E Customer 1772461012823",
+              "items": [
+                {
+                  "productId": {
+                    "_id": "69a59bd53d344839c103b46c",
+                    "name": "E2E Product 1772461012823",
+                    "sku": "E2E-SKU-1772461012823",
+                    "stockQuantity": 107
+                  },
+                  "legacy_productId": "69a59bd53d344839c103b46c",
+                  "productName": "E2E Product 1772461012823",
+                  "quantity": 5,
+                  "unitPrice": 250,
+                  "_id": "69a59bd53d344839c103b47b"
+                }
+              ],
+              "totalAmount": 1250,
+              "status": "Completed",
+              "createdAt": "2026-03-02T14:16:53.430Z",
+              "updatedAt": "2026-03-02T14:16:53.435Z",
+              "__v": 0
+            }
+          ],
+          "message": "Sales orders fetched successfully",
+          "meta": {
+            "total": 3,
+            "page": 1,
+            "pageSize": 10,
+            "totalPages": 1,
+            "search": ""
+          }
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "list_purchase_orders_purchase",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/purchase-orders",
+        "payload": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "data": [
+            {
+              "_id": "69a5a0c4ec117ddc3544a3bc",
+              "supplierId": {
+                "_id": "69a5a0c4ec117ddc3544a396",
+                "name": "Smoke Supplier 1772462276340-887",
+                "email": "supplier+1772462276340-887@example.com",
+                "phone": "9999999999"
+              },
+              "legacy_supplierId": "69a5a0c4ec117ddc3544a396",
+              "supplierName": "Smoke Supplier 1772462276340-887",
+              "items": [
+                {
+                  "productId": "69a5a0c4ec117ddc3544a399",
+                  "legacy_productId": "69a5a0c4ec117ddc3544a399",
+                  "productName": "Smoke Product 1772462276340-887",
+                  "quantity": 3,
+                  "unitPrice": 90,
+                  "_id": "69a5a0c4ec117ddc3544a3bd"
+                }
+              ],
+              "totalAmount": 270,
+              "status": "Pending",
+              "createdAt": "2026-03-02T14:37:56.781Z",
+              "updatedAt": "2026-03-02T14:37:56.781Z",
+              "__v": 0
+            },
+            {
+              "_id": "69a59c0e3547c275adefc20c",
+              "supplierId": {
+                "_id": "69a59c0e3547c275adefc207",
+                "name": "E2E Purchase Supplier 1772461069566",
+                "email": "purchase.supplier.1772461069566@example.com",
+                "phone": "7777777777"
+              },
+              "legacy_supplierId": "69a59c0e3547c275adefc207",
+              "supplierName": "E2E Purchase Supplier 1772461069566",
+              "items": [
+                {
+                  "productId": "69a59c0e3547c275adefc1e8",
+                  "legacy_productId": "69a59c0e3547c275adefc1e8",
+                  "productName": "E2E Product 1772461069566",
+                  "quantity": 12,
+                  "unitPrice": 200,
+                  "_id": "69a59c0e3547c275adefc20d"
+                }
+              ],
+              "totalAmount": 2400,
+              "status": "Received",
+              "createdAt": "2026-03-02T14:17:50.183Z",
+              "updatedAt": "2026-03-02T14:17:50.187Z",
+              "__v": 0
+            },
+            {
+              "_id": "69a59bd53d344839c103b486",
+              "supplierId": {
+                "_id": "69a59bd53d344839c103b482",
+                "name": "E2E Purchase Supplier 1772461012823",
+                "email": "purchase.supplier.1772461012823@example.com",
+                "phone": "7777777777"
+              },
+              "legacy_supplierId": "69a59bd53d344839c103b482",
+              "supplierName": "E2E Purchase Supplier 1772461012823",
+              "items": [
+                {
+                  "productId": "69a59bd53d344839c103b46c",
+                  "legacy_productId": "69a59bd53d344839c103b46c",
+                  "productName": "E2E Product 1772461012823",
+                  "quantity": 12,
+                  "unitPrice": 200,
+                  "_id": "69a59bd53d344839c103b487"
+                }
+              ],
+              "totalAmount": 2400,
+              "status": "Received",
+              "createdAt": "2026-03-02T14:16:53.489Z",
+              "updatedAt": "2026-03-02T14:16:53.494Z",
+              "__v": 0
+            }
+          ],
+          "message": "Purchase orders fetched successfully",
+          "meta": {
+            "total": 3,
+            "page": 1,
+            "pageSize": 10,
+            "totalPages": 1,
+            "search": ""
+          }
+        }
+      },
+      "validationError": null
+    },
+    {
+      "name": "list_invoices_admin",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/invoices",
+        "payload": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true,
+          "data": [
+            {
+              "_id": "69a59c0eb6f532167262610e",
+              "salesOrderId": {
+                "_id": "69a59c0e3547c275adefc1fc",
+                "customerId": "69a59c0e3547c275adefc1eb",
+                "customerName": "E2E Customer 1772461069566",
+                "totalAmount": 1250,
+                "status": "Completed",
+                "createdAt": "2026-03-02T14:17:50.152Z"
+              },
+              "__v": 0,
+              "amount": 1250,
+              "createdAt": "2026-03-02T14:17:50.175Z",
+              "legacy_salesOrderId": "69a59c0e3547c275adefc1fc",
+              "paymentStatus": "Pending",
+              "pdfPath": "/Users/nitheeshvellaiyan/Desktop/ERP system/ERP backend/erp-backend/uploads/invoices/invoice_69a59c0e3547c275adefc1fc.pdf",
+              "updatedAt": "2026-03-02T14:17:50.175Z"
+            },
+            {
+              "_id": "69a59bd5b6f5321672626071",
+              "salesOrderId": {
+                "_id": "69a59bd53d344839c103b47a",
+                "customerId": "69a59bd53d344839c103b46e",
+                "customerName": "E2E Customer 1772461012823",
+                "totalAmount": 1250,
+                "status": "Completed",
+                "createdAt": "2026-03-02T14:16:53.430Z"
+              },
+              "__v": 0,
+              "amount": 1250,
+              "createdAt": "2026-03-02T14:16:53.481Z",
+              "legacy_salesOrderId": "69a59bd53d344839c103b47a",
+              "paymentStatus": "Pending",
+              "pdfPath": "/Users/nitheeshvellaiyan/Desktop/ERP system/ERP backend/erp-backend/uploads/invoices/invoice_69a59bd53d344839c103b47a.pdf",
+              "updatedAt": "2026-03-02T14:16:53.481Z"
+            }
+          ],
+          "message": "Invoices fetched successfully",
+          "meta": {
+            "total": 2,
+            "page": 1,
+            "pageSize": 10,
+            "totalPages": 1,
+            "search": ""
+          }
+        }
+      },
+      "validationError": null
+    }
+  ]
+}

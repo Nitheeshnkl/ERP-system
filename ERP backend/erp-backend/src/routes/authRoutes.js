@@ -15,5 +15,6 @@ router.get('/me', checkAuth, authController.me);
 
 // Admin only
 router.get('/users', checkAuth, checkRole('Admin'), authController.getAllUsers);
+router.put('/users/:id', checkAuth, checkRole('Admin'), authController.updateUser);
 
 module.exports = router;

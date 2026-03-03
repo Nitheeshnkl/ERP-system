@@ -1,0 +1,259 @@
+{
+  "generatedAt": "2026-03-02T15:46:21.010Z",
+  "steps": [
+    {
+      "name": "login_admin",
+      "status": 200,
+      "payload": {
+        "email": "admin@erp.local",
+        "password": "password123"
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTU5NzI3NjA3MTEwODg5YzM1OGExMyIsInJvbGUiOiJBZG1pbiIsInR2IjoxLCJpYXQiOjE3NzI0NjYzODAsImV4cCI6MTc3MzA3MTE4MH0.GkDAOS5G3qCxPCINJbnirZcnaRunr7vU5SnKgR4gR4E",
+          "user": {
+            "id": "69a59727607110889c358a13",
+            "name": "Demo Admin",
+            "email": "admin@erp.local",
+            "role": "Admin"
+          }
+        },
+        "message": "Logged in successfully"
+      }
+    },
+    {
+      "name": "create_customer_admin",
+      "status": 201,
+      "payload": {
+        "name": "Customer 1772466380711-6431",
+        "email": "customer.1772466380711-6431@example.com",
+        "phone": "8888888888",
+        "address": "Address"
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "name": "Customer 1772466380711-6431",
+          "email": "customer.1772466380711-6431@example.com",
+          "phone": "8888888888",
+          "address": "Address",
+          "_id": "69a5b0cc9a993aa35b980827",
+          "createdAt": "2026-03-02T15:46:20.863Z",
+          "updatedAt": "2026-03-02T15:46:20.863Z",
+          "__v": 0
+        },
+        "message": "Customer created successfully"
+      }
+    },
+    {
+      "name": "create_product_admin",
+      "status": 201,
+      "payload": {
+        "name": "Product 1772466380711-6431",
+        "sku": "SKU-1772466380711-6431",
+        "price": 200,
+        "stockQuantity": 30
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "name": "Product 1772466380711-6431",
+          "sku": "SKU-1772466380711-6431",
+          "price": 200,
+          "stockQuantity": 30,
+          "_id": "69a5b0cc9a993aa35b98082a",
+          "createdAt": "2026-03-02T15:46:20.870Z",
+          "updatedAt": "2026-03-02T15:46:20.870Z",
+          "__v": 0
+        },
+        "message": "Product created successfully"
+      }
+    },
+    {
+      "name": "register_sales",
+      "status": 201,
+      "payload": {
+        "name": "Sales User",
+        "email": "sales.1772466380711-6431@example.com",
+        "password": "password123",
+        "role": "Sales"
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "id": "69a5b0cc9a993aa35b98082d",
+          "name": "Sales User",
+          "email": "sales.1772466380711-6431@example.com",
+          "role": "Sales"
+        },
+        "message": "User registered successfully"
+      }
+    },
+    {
+      "name": "login_sales",
+      "status": 200,
+      "payload": {
+        "email": "sales.1772466380711-6431@example.com",
+        "password": "password123"
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTViMGNjOWE5OTNhYTM1Yjk4MDgyZCIsInJvbGUiOiJTYWxlcyIsInR2IjowLCJpYXQiOjE3NzI0NjYzODAsImV4cCI6MTc3MzA3MTE4MH0.Qjpj6qfUEsR1CiYNnWzquF30WEieSbdYiOrwHIKMLbo",
+          "user": {
+            "id": "69a5b0cc9a993aa35b98082d",
+            "name": "Sales User",
+            "email": "sales.1772466380711-6431@example.com",
+            "role": "Sales"
+          }
+        },
+        "message": "Logged in successfully"
+      }
+    },
+    {
+      "name": "admin_create_so_valid_customer",
+      "status": 201,
+      "payload": {
+        "customerId": "69a5b0cc9a993aa35b980827",
+        "items": [
+          {
+            "productId": "69a5b0cc9a993aa35b98082a",
+            "quantity": 2,
+            "unitPrice": 200
+          }
+        ],
+        "totalAmount": 400,
+        "status": "Pending"
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "customerId": "69a5b0cc9a993aa35b980827",
+          "legacy_customerId": "69a5b0cc9a993aa35b980827",
+          "customerName": "Customer 1772466380711-6431",
+          "items": [
+            {
+              "productId": "69a5b0cc9a993aa35b98082a",
+              "legacy_productId": "69a5b0cc9a993aa35b98082a",
+              "productName": "Product 1772466380711-6431",
+              "quantity": 2,
+              "unitPrice": 200,
+              "_id": "69a5b0cc9a993aa35b980834"
+            }
+          ],
+          "totalAmount": 400,
+          "status": "Pending",
+          "_id": "69a5b0cc9a993aa35b980833",
+          "createdAt": "2026-03-02T15:46:20.997Z",
+          "updatedAt": "2026-03-02T15:46:20.997Z",
+          "__v": 0
+        },
+        "message": "Sales order created successfully"
+      }
+    },
+    {
+      "name": "sales_create_so_valid_customer",
+      "status": 201,
+      "payload": {
+        "customerId": "69a5b0cc9a993aa35b980827",
+        "items": [
+          {
+            "productId": "69a5b0cc9a993aa35b98082a",
+            "quantity": 2,
+            "unitPrice": 200
+          }
+        ],
+        "totalAmount": 400,
+        "status": "Pending"
+      },
+      "body": {
+        "success": true,
+        "data": {
+          "customerId": "69a5b0cc9a993aa35b980827",
+          "legacy_customerId": "69a5b0cc9a993aa35b980827",
+          "customerName": "Customer 1772466380711-6431",
+          "items": [
+            {
+              "productId": "69a5b0cc9a993aa35b98082a",
+              "legacy_productId": "69a5b0cc9a993aa35b98082a",
+              "productName": "Product 1772466380711-6431",
+              "quantity": 2,
+              "unitPrice": 200,
+              "_id": "69a5b0cd9a993aa35b98083a"
+            }
+          ],
+          "totalAmount": 400,
+          "status": "Pending",
+          "_id": "69a5b0cd9a993aa35b980839",
+          "createdAt": "2026-03-02T15:46:21.003Z",
+          "updatedAt": "2026-03-02T15:46:21.003Z",
+          "__v": 0
+        },
+        "message": "Sales order created successfully"
+      }
+    },
+    {
+      "name": "admin_create_so_invalid_customer_id",
+      "status": 400,
+      "payload": {
+        "customerId": "not-an-objectid",
+        "items": [
+          {
+            "productId": "69a5b0cc9a993aa35b98082a",
+            "quantity": 2,
+            "unitPrice": 200
+          }
+        ],
+        "totalAmount": 400,
+        "status": "Pending"
+      },
+      "body": {
+        "success": false,
+        "data": null,
+        "message": "Invalid Customer ID"
+      }
+    },
+    {
+      "name": "admin_create_so_non_existing_customer",
+      "status": 400,
+      "payload": {
+        "customerId": "507f1f77bcf86cd799439011",
+        "items": [
+          {
+            "productId": "69a5b0cc9a993aa35b98082a",
+            "quantity": 2,
+            "unitPrice": 200
+          }
+        ],
+        "totalAmount": 400,
+        "status": "Pending"
+      },
+      "body": {
+        "success": false,
+        "data": null,
+        "message": "Customer not found"
+      }
+    },
+    {
+      "name": "admin_create_so_missing_customer",
+      "status": 400,
+      "payload": {
+        "items": [
+          {
+            "productId": "69a5b0cc9a993aa35b98082a",
+            "quantity": 2,
+            "unitPrice": 200
+          }
+        ],
+        "totalAmount": 400,
+        "status": "Pending"
+      },
+      "body": {
+        "success": false,
+        "data": null,
+        "message": "Customer ID is required"
+      }
+    }
+  ]
+}

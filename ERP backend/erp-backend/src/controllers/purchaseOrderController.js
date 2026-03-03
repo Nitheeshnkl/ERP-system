@@ -1,7 +1,22 @@
+const mongoose = require('mongoose');
 const PurchaseOrder = require('../models/PurchaseOrder');
 const { success, error } = require('../utils/response');
 const { getPaginationOptions, buildSearchFilter, buildMeta } = require('../utils/pagination');
 const { resolveSupplier, resolveProduct } = require('../utils/orderResolvers');
+
+const isClientError = (requestError) => {
+  if (!requestError) return false;
+  if (requestError.name === 'ValidationError' || requestError.name === 'CastError') return true;
+  const message = String(requestError.message || '').toLowerCase();
+  return [
+    'required',
+    'not found',
+    'quantity',
+    'invalid',
+    'enum',
+    'duplicate',
+  ].some((marker) => message.includes(marker));
+};
 
 const normalizePurchaseOrderPayload = async (payload) => {
   const supplier = await resolveSupplier(payload.supplierId || payload.supplierName);
@@ -76,40 +91,116 @@ exports.getPurchaseOrder = async (req, res) => {
 
 exports.createPurchaseOrder = async (req, res) => {
   try {
+    console.log('[DEBUG CREATE] body:', req.body);
     const normalizedPayload = await normalizePurchaseOrderPayload(req.body);
     const order = new PurchaseOrder(normalizedPayload);
     await order.save();
     return success(res, order, 'Purchase order created successfully', 201);
   } catch (requestError) {
-    return error(res, requestError.message, 400);
+    return error(res, requestError.message, isClientError(requestError) ? 400 : 500);
   }
 };
 
 exports.updatePurchaseOrder = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    const existing = await PurchaseOrder.findById(req.params.id);
-    if (!existing) {
+    console.log('[DEBUG UPDATE] id:', req.params.id);
+    // Debug: Log incoming request body
+    console.log('[DEBUG TRANSACTION START] updatePurchaseOrder')
+    console.log('[DEBUG UPDATE PAYLOAD] incoming:', JSON.stringify(req.body))
+
+    // Validate Order ID is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      await session.abortTransaction();
+      session.endSession();
+      return error(res, 'Invalid Order ID', 400);
+    }
+
+    const existingOrder = await PurchaseOrder.findById(req.params.id).session(session);
+    if (!existingOrder) {
+      await session.abortTransaction();
+      session.endSession();
       return error(res, 'Purchase Order not found', 404);
     }
 
-    const hasItemsOrSupplierUpdate = Boolean(req.body.supplierId || req.body.supplierName || req.body.items);
-    const normalizedPayload = hasItemsOrSupplierUpdate
-      ? await normalizePurchaseOrderPayload({
-        ...existing.toObject(),
+    // Fix: Check for actual items array (even empty array is valid)
+    const hasItemsArray = Array.isArray(req.body.items);
+    const hasItemsOrSupplierUpdate = (
+      req.body.supplierId !== undefined ||
+      req.body.supplierName !== undefined ||
+      hasItemsArray
+    );
+
+    console.log('[DEBUG] hasItemsArray:', hasItemsArray, 'hasItemsOrSupplierUpdate:', hasItemsOrSupplierUpdate);
+
+    let order = existingOrder;
+    let normalizedPayload;
+
+    if (hasItemsOrSupplierUpdate) {
+      // If items array is explicitly provided (even if empty), normalize it
+      if (hasItemsArray) {
+        // Allow empty array to clear items, or process items normally
+        if (req.body.items.length > 0) {
+          normalizedPayload = await normalizePurchaseOrderPayload({
+            ...order.toObject(),
+            ...req.body,
+          });
+        } else {
+          // Empty items array - clear items but keep totals
+          normalizedPayload = {
+            ...order.toObject(),
+            items: [],
+            totalAmount: req.body.totalAmount !== undefined ? Number(req.body.totalAmount) : 0,
+          };
+        }
+      } else if (req.body.supplierId !== undefined || req.body.supplierName !== undefined) {
+        // Only supplier changed, normalize with existing items
+        normalizedPayload = await normalizePurchaseOrderPayload({
+          ...order.toObject(),
+          ...req.body,
+        });
+      }
+    } else {
+      // No items/supplier update, just update simple fields
+      normalizedPayload = {
         ...req.body,
-      })
-      : {
-        ...req.body,
-        totalAmount: req.body.totalAmount ? Number(req.body.totalAmount) : existing.totalAmount,
+        totalAmount: req.body.totalAmount !== undefined ? Number(req.body.totalAmount) : existingOrder.totalAmount,
       };
+    }
 
-    const order = await PurchaseOrder.findByIdAndUpdate(req.params.id, normalizedPayload, { new: true });
-    if (!order) {
+    // Use findByIdAndUpdate with session for transaction safety
+    const updatedOrder = await PurchaseOrder.findByIdAndUpdate(
+      req.params.id,
+      normalizedPayload,
+      { new: true, session }
+    );
+
+    if (!updatedOrder) {
+      await session.abortTransaction();
+      session.endSession();
       return error(res, 'Purchase Order not found', 404);
     }
-    return success(res, order, 'Purchase order updated successfully');
+
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    console.log('[DEBUG TRANSACTION COMMIT] Purchase order updated:', updatedOrder._id)
+    console.log('[DEBUG DB RESULT] items:', JSON.stringify(updatedOrder.items))
+
+    // Fetch updated order with populated fields for response
+    const populatedOrder = await PurchaseOrder.findById(updatedOrder._id)
+      .populate({ path: 'supplierId', select: 'name email phone' })
+      .populate({ path: 'items.productId', select: 'name sku stockQuantity' });
+
+    return success(res, populatedOrder, 'Purchase order updated successfully');
   } catch (requestError) {
-    return error(res, requestError.message, 400);
+    await session.abortTransaction();
+    session.endSession();
+    console.error('[DEBUG] updatePurchaseOrder error:', requestError.message);
+    return error(res, requestError.message, isClientError(requestError) ? 400 : 500);
   }
 };
 

@@ -8,6 +8,7 @@ const connectDB = require('./src/config/db');
 const { success, error } = require('./src/utils/response');
 const { notFoundHandler, errorHandler } = require('./src/middleware/errorHandler');
 const { apiRateLimiter } = require('./src/middleware/rateLimit');
+const { swaggerUi, swaggerSpec } = require('./src/config/swagger');
 
 // Route imports
 const authRoutes = require('./src/routes/authRoutes');
@@ -110,6 +111,8 @@ app.get('/ready', (_req, res) => {
     db: 'connected',
   }, 'Readiness check completed');
 });
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
 app.use('/api', apiRateLimiter);

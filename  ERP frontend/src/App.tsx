@@ -17,6 +17,7 @@ const PurchaseOrders = lazy(() => import('./pages/PurchaseOrders'))
 const GRN = lazy(() => import('./pages/GRN'))
 const SalesOrders = lazy(() => import('./pages/SalesOrders'))
 const Invoices = lazy(() => import('./pages/Invoices'))
+const AdminUsers = lazy(() => import('./pages/AdminUsers'))
 
 function App() {
   const dispatch = useDispatch<AppDispatch>()
@@ -104,6 +105,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['Admin', 'Sales']}>
                 <Invoices />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute allowedRoles={['Admin']}>
+                <AdminUsers />
               </ProtectedRoute>
             }
           />

@@ -7,24 +7,33 @@ const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$
 
 const isObjectId = (value) => mongoose.Types.ObjectId.isValid(String(value || '').trim());
 
-const resolveCustomer = async (value) => {
-  const input = String(value || '').trim();
+const extractIdentifier = (value) => {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'string' || typeof value === 'number') return String(value).trim();
+  if (typeof value === 'object') {
+    const obj = value;
+    const candidates = [obj._id, obj.id, obj.customerId, obj.value];
+    for (const candidate of candidates) {
+      const resolved = extractIdentifier(candidate);
+      if (resolved) return resolved;
+    }
+  }
+  return '';
+};
+
+const resolveCustomerById = async (value) => {
+  const input = extractIdentifier(value);
   if (!input) {
-    throw new Error('Customer is required');
+    throw new Error('Customer ID is required');
   }
 
-  if (isObjectId(input)) {
-    const customer = await Customer.findById(input).select('_id name email');
-    if (customer) return customer;
+  if (!isObjectId(input)) {
+    throw new Error('Invalid Customer ID');
   }
 
-  const exactPattern = new RegExp(`^${escapeRegex(input)}$`, 'i');
-  const customer = await Customer.findOne({
-    $or: [{ name: exactPattern }, { email: exactPattern }],
-  }).select('_id name email');
-
+  const customer = await Customer.findById(input).select('_id name email');
   if (!customer) {
-    throw new Error(`Customer not found for "${input}"`);
+    throw new Error('Customer not found');
   }
 
   return customer;
@@ -77,7 +86,7 @@ const resolveProduct = async (value) => {
 };
 
 module.exports = {
-  resolveCustomer,
+  resolveCustomerById,
   resolveSupplier,
   resolveProduct,
 };

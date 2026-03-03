@@ -19,6 +19,7 @@ import {
   LocalShipping as ShippingIcon,
   ShoppingCart as ShoppingCartIcon,
   Description as DescriptionIcon,
+  ManageAccounts as ManageAccountsIcon,
 } from '@mui/icons-material'
 import { RootState } from '../app/store'
 
@@ -81,6 +82,12 @@ const menuItems: MenuItem[] = [
     path: '/invoices',
     icon: <DescriptionIcon />,
     allowedRoles: ['Admin', 'Sales'], // Only admin and sales
+  },
+  {
+    label: 'Admin Users',
+    path: '/admin/users',
+    icon: <ManageAccountsIcon />,
+    allowedRoles: ['Admin'],
   },
 ]
 
