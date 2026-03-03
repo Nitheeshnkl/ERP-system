@@ -142,6 +142,7 @@ ERP system/
 - `API_DOCUMENTATION.md`
 - `DATABASE_STRUCTURE.md`
 - `CHANGELOG.md`
+<<<<<<< HEAD
 
 ## Docker
 
@@ -172,3 +173,5 @@ Workflow file: `.github/workflows/ci.yml`
 - Backend: install dependencies and run `npm test`
 - Frontend: install dependencies, run `npm test`, run `npm run type-check`
 - Docker build: build backend and frontend Docker images (validation only, no push)
+=======
+>>>>>>> origin/main

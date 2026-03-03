@@ -2,25 +2,45 @@
 _backups/
 README 2.md
 RBAC_FINAL_REPORT 2.txt
+
+# Dependencies
 node_modules/
 **/node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build artifacts
 dist/
 **/dist/
+build/
+.vite/
 coverage/
 **/coverage/
+
+# Environment
 .env
 **/.env
 .env.local
 **/.env.local
 .env.*.local
+.env.production
+
+# Logs and temp
 *.log
 .cache/
 .tmp/
 tmp/
 *.tmp
+*.pid
+
+# Tooling
 .idea/
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
 .docker/
-*.pid
+
+# Database dumps
+dump/
+*.gz
+*.tar
