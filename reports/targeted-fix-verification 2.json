@@ -1,0 +1,289 @@
+[
+  {
+    "name": "login_admin",
+    "status": 200,
+    "body": {
+      "success": true,
+      "data": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTU5NzI3NjA3MTEwODg5YzM1OGExMyIsInJvbGUiOiJBZG1pbiIsInR2IjowLCJpYXQiOjE3NzI0NjI2ODEsImV4cCI6MTc3MzA2NzQ4MX0._pKVqkD6_Zl-LsCmlu2A3LWaY14v6EIrd_4MtnrRMWw",
+        "user": {
+          "id": "69a59727607110889c358a13",
+          "name": "Demo Admin",
+          "email": "admin@erp.local",
+          "role": "Admin"
+        }
+      },
+      "message": "Logged in successfully"
+    },
+    "payload": {
+      "email": "admin@erp.local",
+      "password": "password123"
+    }
+  },
+  {
+    "name": "create_supplier_admin_without_email",
+    "status": 201,
+    "body": {
+      "success": true,
+      "data": {
+        "name": "Supplier No Email 1772462681199-4106",
+        "phone": "9999999999",
+        "address": "No email address",
+        "city": "",
+        "state": "",
+        "country": "",
+        "postalCode": "",
+        "_id": "69a5a259b940d49001d92a35",
+        "createdAt": "2026-03-02T14:44:41.293Z",
+        "updatedAt": "2026-03-02T14:44:41.293Z",
+        "__v": 0
+      },
+      "message": "Supplier created successfully"
+    },
+    "payload": {
+      "name": "Supplier No Email 1772462681199-4106",
+      "phone": "9999999999",
+      "address": "No email address"
+    }
+  },
+  {
+    "name": "create_product_admin_for_role_test",
+    "status": 201,
+    "body": {
+      "success": true,
+      "data": {
+        "name": "RoleTest Product 1772462681199-4106",
+        "sku": "ROLE-1772462681199-4106",
+        "price": 300,
+        "stockQuantity": 20,
+        "_id": "69a5a259b940d49001d92a3a",
+        "createdAt": "2026-03-02T14:44:41.299Z",
+        "updatedAt": "2026-03-02T14:44:41.299Z",
+        "__v": 0
+      },
+      "message": "Product created successfully"
+    },
+    "payload": {
+      "name": "RoleTest Product 1772462681199-4106",
+      "sku": "ROLE-1772462681199-4106",
+      "price": 300,
+      "stockQuantity": 20
+    }
+  },
+  {
+    "name": "create_customer_admin_for_role_test",
+    "status": 201,
+    "body": {
+      "success": true,
+      "data": {
+        "name": "RoleTest Customer 1772462681199-4106",
+        "email": "roletest.customer.1772462681199-4106@example.com",
+        "phone": "8888888888",
+        "address": "Role test address",
+        "_id": "69a5a259b940d49001d92a46",
+        "createdAt": "2026-03-02T14:44:41.304Z",
+        "updatedAt": "2026-03-02T14:44:41.304Z",
+        "__v": 0
+      },
+      "message": "Customer created successfully"
+    },
+    "payload": {
+      "name": "RoleTest Customer 1772462681199-4106",
+      "email": "roletest.customer.1772462681199-4106@example.com",
+      "phone": "8888888888",
+      "address": "Role test address"
+    }
+  },
+  {
+    "name": "create_supplier_admin_for_purchase_test",
+    "status": 201,
+    "body": {
+      "success": true,
+      "data": {
+        "name": "RoleTest Supplier 1772462681199-4106",
+        "email": "roletest.supplier.1772462681199-4106@example.com",
+        "phone": "7777777777",
+        "address": "Role test supplier address",
+        "city": "",
+        "state": "",
+        "country": "",
+        "postalCode": "",
+        "_id": "69a5a259b940d49001d92a4b",
+        "createdAt": "2026-03-02T14:44:41.308Z",
+        "updatedAt": "2026-03-02T14:44:41.308Z",
+        "__v": 0
+      },
+      "message": "Supplier created successfully"
+    },
+    "payload": {
+      "name": "RoleTest Supplier 1772462681199-4106",
+      "email": "roletest.supplier.1772462681199-4106@example.com",
+      "phone": "7777777777",
+      "address": "Role test supplier address"
+    }
+  },
+  {
+    "name": "register_sales",
+    "status": 201,
+    "body": {
+      "success": true,
+      "data": {
+        "id": "69a5a259b940d49001d92a52",
+        "name": "Role Test Sales",
+        "email": "roletest.sales.1772462681199-4106@example.com",
+        "role": "Sales"
+      },
+      "message": "User registered successfully"
+    },
+    "payload": {
+      "name": "Role Test Sales",
+      "email": "roletest.sales.1772462681199-4106@example.com",
+      "password": "password123",
+      "role": "Sales"
+    }
+  },
+  {
+    "name": "login_sales",
+    "status": 200,
+    "body": {
+      "success": true,
+      "data": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTVhMjU5Yjk0MGQ0OTAwMWQ5MmE1MiIsInJvbGUiOiJTYWxlcyIsInR2IjowLCJpYXQiOjE3NzI0NjI2ODEsImV4cCI6MTc3MzA2NzQ4MX0._DW9-YiSKJJFX9uZYl4kwhAUci2qXikg0ygOhu2QGNM",
+        "user": {
+          "id": "69a5a259b940d49001d92a52",
+          "name": "Role Test Sales",
+          "email": "roletest.sales.1772462681199-4106@example.com",
+          "role": "Sales"
+        }
+      },
+      "message": "Logged in successfully"
+    },
+    "payload": {
+      "email": "roletest.sales.1772462681199-4106@example.com",
+      "password": "password123"
+    }
+  },
+  {
+    "name": "create_sales_order_with_lowercase_role_token",
+    "status": 201,
+    "body": {
+      "success": true,
+      "data": {
+        "customerId": "69a5a259b940d49001d92a46",
+        "legacy_customerId": "69a5a259b940d49001d92a46",
+        "customerName": "RoleTest Customer 1772462681199-4106",
+        "items": [
+          {
+            "productId": "69a5a259b940d49001d92a3a",
+            "legacy_productId": "69a5a259b940d49001d92a3a",
+            "productName": "RoleTest Product 1772462681199-4106",
+            "quantity": 2,
+            "unitPrice": 300,
+            "_id": "69a5a259b940d49001d92a6b"
+          }
+        ],
+        "totalAmount": 600,
+        "status": "Pending",
+        "_id": "69a5a259b940d49001d92a6a",
+        "createdAt": "2026-03-02T14:44:41.437Z",
+        "updatedAt": "2026-03-02T14:44:41.437Z",
+        "__v": 0
+      },
+      "message": "Sales order created successfully"
+    },
+    "payload": {
+      "customerId": "69a5a259b940d49001d92a46",
+      "items": [
+        {
+          "productId": "69a5a259b940d49001d92a3a",
+          "quantity": 2,
+          "unitPrice": 300
+        }
+      ],
+      "totalAmount": 600,
+      "status": "Pending"
+    }
+  },
+  {
+    "name": "register_purchase",
+    "status": 201,
+    "body": {
+      "success": true,
+      "data": {
+        "id": "69a5a259b940d49001d92a6e",
+        "name": "Role Test Purchase",
+        "email": "roletest.purchase.1772462681199-4106@example.com",
+        "role": "Purchase"
+      },
+      "message": "User registered successfully"
+    },
+    "payload": {
+      "name": "Role Test Purchase",
+      "email": "roletest.purchase.1772462681199-4106@example.com",
+      "password": "password123",
+      "role": "Purchase"
+    }
+  },
+  {
+    "name": "login_purchase",
+    "status": 200,
+    "body": {
+      "success": true,
+      "data": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTVhMjU5Yjk0MGQ0OTAwMWQ5MmE2ZSIsInJvbGUiOiJQdXJjaGFzZSIsInR2IjowLCJpYXQiOjE3NzI0NjI2ODEsImV4cCI6MTc3MzA2NzQ4MX0.ED-LMOxgS9Z5BGRRSO1NKnWB_9KYOZqrJKn1WleejR0",
+        "user": {
+          "id": "69a5a259b940d49001d92a6e",
+          "name": "Role Test Purchase",
+          "email": "roletest.purchase.1772462681199-4106@example.com",
+          "role": "Purchase"
+        }
+      },
+      "message": "Logged in successfully"
+    },
+    "payload": {
+      "email": "roletest.purchase.1772462681199-4106@example.com",
+      "password": "password123"
+    }
+  },
+  {
+    "name": "create_purchase_order_with_lowercase_role_token",
+    "status": 201,
+    "body": {
+      "success": true,
+      "data": {
+        "supplierId": "69a5a259b940d49001d92a4b",
+        "legacy_supplierId": "69a5a259b940d49001d92a4b",
+        "supplierName": "RoleTest Supplier 1772462681199-4106",
+        "items": [
+          {
+            "productId": "69a5a259b940d49001d92a3a",
+            "legacy_productId": "69a5a259b940d49001d92a3a",
+            "productName": "RoleTest Product 1772462681199-4106",
+            "quantity": 4,
+            "unitPrice": 250,
+            "_id": "69a5a259b940d49001d92a81"
+          }
+        ],
+        "totalAmount": 1000,
+        "status": "Pending",
+        "_id": "69a5a259b940d49001d92a80",
+        "createdAt": "2026-03-02T14:44:41.567Z",
+        "updatedAt": "2026-03-02T14:44:41.567Z",
+        "__v": 0
+      },
+      "message": "Purchase order created successfully"
+    },
+    "payload": {
+      "supplierId": "69a5a259b940d49001d92a4b",
+      "items": [
+        {
+          "productId": "69a5a259b940d49001d92a3a",
+          "quantity": 4,
+          "unitPrice": 250
+        }
+      ],
+      "totalAmount": 1000,
+      "status": "Pending"
+    }
+  }
+]

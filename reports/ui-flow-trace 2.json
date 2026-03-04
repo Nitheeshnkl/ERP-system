@@ -1,0 +1,139 @@
+{
+  "generatedAt": "2026-03-02T15:16:14.993Z",
+  "sales": {
+    "tokenPresentInLocalStorage": true,
+    "authHeaderAttached": true,
+    "request": {
+      "url": "http://localhost:8000/api/sales-orders",
+      "method": "POST",
+      "headers": {
+        "sec-ch-ua-platform": "\"macOS\"",
+        "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTVhOWJhYjk0MGQ0OTAwMWQ5MmU1OSIsInJvbGUiOiJTYWxlcyIsInR2IjowLCJpYXQiOjE3NzI0NjQ1NzIsImV4cCI6MTc3MzA2OTM3Mn0.cInqVJmlqSw43-_p9yosZBEX4Sihhxnsnv1XQonF8Js",
+        "referer": "http://127.0.0.1:5173/",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+        "accept": "application/json, text/plain, */*",
+        "content-type": "application/json"
+      },
+      "body": {
+        "orderNumber": "",
+        "customerId": "69a5a9bab940d49001d92e56",
+        "customerName": "69a5a9bab940d49001d92e56",
+        "items": [
+          {
+            "productId": "69a5a9bab940d49001d92e53",
+            "productName": "69a5a9bab940d49001d92e53",
+            "quantity": 2,
+            "unitPrice": 180
+          }
+        ],
+        "totalAmount": 360,
+        "status": "Pending"
+      }
+    },
+    "response": {
+      "status": 201,
+      "body": {
+        "success": true,
+        "data": {
+          "customerId": "69a5a9bab940d49001d92e56",
+          "legacy_customerId": "69a5a9bab940d49001d92e56",
+          "customerName": "UI Customer 1772464570370-6990",
+          "items": [
+            {
+              "productId": "69a5a9bab940d49001d92e53",
+              "legacy_productId": "69a5a9bab940d49001d92e53",
+              "productName": "UI Product 1772464570370-6990",
+              "quantity": 2,
+              "unitPrice": 180,
+              "_id": "69a5a9bdb940d49001d92e85"
+            }
+          ],
+          "totalAmount": 360,
+          "status": "Pending",
+          "_id": "69a5a9bdb940d49001d92e84",
+          "createdAt": "2026-03-02T15:16:13.088Z",
+          "updatedAt": "2026-03-02T15:16:13.088Z",
+          "__v": 0
+        },
+        "message": "Sales order created successfully"
+      }
+    }
+  },
+  "purchase": {
+    "tokenPresentInLocalStorage": true,
+    "authHeaderAttached": true,
+    "request": {
+      "url": "http://localhost:8000/api/purchase-orders",
+      "method": "POST",
+      "headers": {
+        "sec-ch-ua-platform": "\"macOS\"",
+        "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTVhOWJhYjk0MGQ0OTAwMWQ5MmU1YyIsInJvbGUiOiJQdXJjaGFzZSIsInR2IjowLCJpYXQiOjE3NzI0NjQ1NzQsImV4cCI6MTc3MzA2OTM3NH0.88Yy4X9pzXLvjZ6ovUsI6wI4z77D3bs49WKXnnChomk",
+        "referer": "http://127.0.0.1:5173/",
+        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+        "sec-ch-ua-mobile": "?0",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+        "accept": "application/json, text/plain, */*",
+        "content-type": "application/json"
+      },
+      "body": {
+        "orderNumber": "PO-574782",
+        "supplierId": "69a5a9bab940d49001d92e50",
+        "supplierName": "69a5a9bab940d49001d92e50",
+        "items": [
+          {
+            "productId": "69a5a9bab940d49001d92e53",
+            "productName": "69a5a9bab940d49001d92e53",
+            "quantity": 3,
+            "unitPrice": 150
+          }
+        ],
+        "totalAmount": 450,
+        "status": "Pending"
+      }
+    },
+    "response": {
+      "status": 201,
+      "body": {
+        "success": true,
+        "data": {
+          "supplierId": "69a5a9bab940d49001d92e50",
+          "legacy_supplierId": "69a5a9bab940d49001d92e50",
+          "supplierName": "UI Supplier 1772464570370-6990",
+          "items": [
+            {
+              "productId": "69a5a9bab940d49001d92e53",
+              "legacy_productId": "69a5a9bab940d49001d92e53",
+              "productName": "UI Product 1772464570370-6990",
+              "quantity": 3,
+              "unitPrice": 150,
+              "_id": "69a5a9beb940d49001d92eac"
+            }
+          ],
+          "totalAmount": 450,
+          "status": "Pending",
+          "_id": "69a5a9beb940d49001d92eab",
+          "createdAt": "2026-03-02T15:16:14.955Z",
+          "updatedAt": "2026-03-02T15:16:14.955Z",
+          "__v": 0
+        },
+        "message": "Purchase order created successfully"
+      }
+    }
+  },
+  "comparison": {
+    "salesVsProgrammatic": {
+      "missingKeys": [],
+      "extraKeys": [
+        "orderNumber"
+      ]
+    },
+    "purchaseVsProgrammatic": {
+      "missingKeys": [],
+      "extraKeys": [
+        "orderNumber"
+      ]
+    }
+  }
+}
