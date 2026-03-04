@@ -1,0 +1,76 @@
+name: Deploy Production (Manual Artifact Preparation)
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  prepare-prod-artifacts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run backend tests (if configured)
+        working-directory: ./backend
+        run: |
+          if npm run | grep -qE '^  test'; then
+            npm test
+          else
+            echo "No backend test script found. Skipping test execution."
+          fi
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Build backend Docker image (validation only)
+        run: |
+          set -euo pipefail
+          docker build -t erp-backend:${GITHUB_SHA::7} ./backend 2>&1 | tee backend-docker-build.log
+          docker image inspect erp-backend:${GITHUB_SHA::7} > backend-docker-image-inspect.json
+
+      - name: Package frontend artifact
+        run: |
+          cd frontend
+          zip -r ../frontend-dist.zip dist
+
+      - name: Upload frontend build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend-dist.zip
+
+      - name: Upload backend docker build logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-docker-build-logs
+          path: |
+            backend-docker-build.log
+            backend-docker-image-inspect.json
+
+      - name: Manual deployment reminder
+        run: |
+          echo "Artifacts created."
+          echo "Manual next steps:"
+          echo "1) Deploy frontend artifact to Vercel (or use Vercel git integration)."
+          echo "2) Configure Render service from ./backend with required env vars."
+          echo "3) Add secrets in GitHub/Render/Vercel dashboards."
