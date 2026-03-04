@@ -2,9 +2,17 @@ const jwt = require('jsonwebtoken');
 const { error } = require('../utils/response');
 const User = require('../models/User');
 const { hasRole } = require('../utils/roles');
-const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
+
+const getJwtSecret = () => {
+  const jwtSecret = (process.env.JWT_SECRET || '').trim();
+  if (!jwtSecret) {
+    throw new Error('Missing required environment variable: JWT_SECRET');
+  }
+  return jwtSecret;
+};
 
 exports.checkAuth = async (req, res, next) => {
+  const JWT_SECRET = getJwtSecret();
   let token = req.cookies?.token;
 
   if (!token) {

@@ -2,10 +2,18 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { success, error } = require('../utils/response');
 const { canonicalizeRole, normalizeRole } = require('../utils/roles');
-const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
+
+const getJwtSecret = () => {
+  const jwtSecret = (process.env.JWT_SECRET || '').trim();
+  if (!jwtSecret) {
+    throw new Error('Missing required environment variable: JWT_SECRET');
+  }
+  return jwtSecret;
+};
 
 exports.register = async (req, res) => {
   try {
+    const JWT_SECRET = getJwtSecret();
     const { name, email, password, role } = req.body;
     const requestedRole = normalizeRole(role);
     const normalizedRole = role ? canonicalizeRole(role) : 'Inventory';
@@ -75,6 +83,7 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
+    const JWT_SECRET = getJwtSecret();
     const { email, username, password } = req.body;
     const identifier = (email || username || '').trim();
 
@@ -124,6 +133,7 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = (req, res) => {
+  const JWT_SECRET = getJwtSecret();
   const completeLogout = () => {
     res.clearCookie('token', {
       httpOnly: true,
