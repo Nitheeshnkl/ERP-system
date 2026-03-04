@@ -30,7 +30,7 @@ This guide prepares deployment assets and manual production steps without storin
 2. Set project root directory to `frontend`.
 3. Confirm build command is `npm run build` and output directory is `dist`.
 4. Add environment variable:
-   - `VITE_API_BASE_URL=https://<your-render-backend-domain>/api`
+   - `VITE_API_BASE_URL=https://<your-render-backend-domain>` (frontend now auto-appends `/api` if missing)
 5. Deploy and verify frontend can access backend.
 
 ## 4) Seed production admin user (manual)

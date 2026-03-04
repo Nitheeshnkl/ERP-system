@@ -2,7 +2,15 @@ import axios from 'axios'
 import { getErrorMessage } from '../utils/errorUtils'
 
 const API_ORIGIN = (import.meta.env.VITE_API_URL as string) || 'http://localhost:8000'
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || `${API_ORIGIN}/api`
+const normalizeApiBaseUrl = () => {
+  const rawBase = ((import.meta.env.VITE_API_BASE_URL as string) || API_ORIGIN).trim()
+  const withoutTrailingSlash = rawBase.replace(/\/+$/, '')
+  return withoutTrailingSlash.endsWith('/api')
+    ? withoutTrailingSlash
+    : `${withoutTrailingSlash}/api`
+}
+
+const API_BASE_URL = normalizeApiBaseUrl()
 const TOKEN_KEY = 'auth_token'
 
 const axiosInstance = axios.create({
