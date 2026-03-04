@@ -25,39 +25,15 @@ const app = express();
 let server;
 let isShuttingDown = false;
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-];
-
-if (process.env.CLIENT_URL) {
-  allowedOrigins.push(process.env.CLIENT_URL.trim());
-}
-
-if (process.env.CLIENT_URLS) {
-  process.env.CLIENT_URLS
+const rawOrigins = process.env.CORS_ALLOWED_ORIGINS || '';
+const allowedOrigins = rawOrigins === '*'
+  ? '*'
+  : rawOrigins
     .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean)
-    .forEach((origin) => allowedOrigins.push(origin));
-}
+    .map((o) => o.trim())
+    .filter(Boolean);
 
-const uniqueAllowedOrigins = [...new Set(allowedOrigins)];
-const corsOptionsDelegate = (req, callback) => {
-  const requestOrigin = req.header('Origin');
-  const corsOptions = {
-    origin: false,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  };
-
-  if (!requestOrigin || uniqueAllowedOrigins.includes(requestOrigin)) {
-    corsOptions.origin = true;
-  }
-
-  callback(null, corsOptions);
-};
+console.log('Allowed CORS origins:', allowedOrigins);
 
 const validateEnv = () => {
   const missing = [];
@@ -83,8 +59,28 @@ const validateEnv = () => {
 // Middleware
 app.use(helmet());
 app.use(express.json());
-app.use(cors(corsOptionsDelegate));
-app.options('*', cors(corsOptionsDelegate));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow non-browser requests (Postman, server-to-server)
+      if (!origin) return callback(null, true);
+
+      // Allow all (only if explicitly set)
+      if (allowedOrigins === '*') {
+        return callback(null, true);
+      }
+
+      // Allow listed origins
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Block everything else
+      return callback(new Error(`CORS blocked: ${origin}`), false);
+    },
+    credentials: true
+  })
+);
 app.use(cookieParser());
 app.use((req, _res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
@@ -136,7 +132,6 @@ const startServer = async () => {
 
     server = app.listen(PORT, () => {
       console.log(`ERP backend listening on http://localhost:${PORT}`);
-      console.log(`Allowed CORS origins: ${uniqueAllowedOrigins.join(', ')}`);
     });
 
     server.on('error', (listenError) => {
