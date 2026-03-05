@@ -7,7 +7,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "lint": "eslint src",
-    "seed": "node scripts/seed.js",
+    "seed": "node scripts/seedDatabase.js",
     "verify:env": "node scripts/verify-env.js"
   },
   "dependencies": {
