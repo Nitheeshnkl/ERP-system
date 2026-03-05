@@ -1,0 +1,9 @@
+[
+  {
+    "name": "Admin User",
+    "email": "admin@erp.local",
+    "password": "$2b$10$7.mYb.M5tZDztFeHCDzv6OdcgK3NfPCbWKznMCCbdsddkgQplWb8e",
+    "role": "Admin",
+    "tokenVersion": 0
+  }
+]
