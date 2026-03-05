@@ -56,7 +56,7 @@ export default function Suppliers() {
   }
 
   const openEdit = (row: any) => {
-    setEditingId(row.id)
+    setEditingId(row.id || row._id || null)
     reset({
       name: row.name || '',
       email: row.email || '',
@@ -67,12 +67,25 @@ export default function Suppliers() {
   }
 
   const onSubmit = async (form: SupplierForm) => {
+    const payload = {
+      name: String(form.name || '').trim(),
+      email: String(form.email || '').trim(),
+      phone: String(form.phone || '').trim(),
+      address: String(form.address || '').trim(),
+    }
+    const updatePayload = Object.fromEntries(
+      Object.entries(payload).filter(([, value]) => value !== '')
+    )
+
     try {
       if (editingId) {
-        await dispatch(updateSupplier({ id: editingId, payload: form })).unwrap()
+        if (Object.keys(updatePayload).length === 0) {
+          throw new Error('Please provide at least one field to update')
+        }
+        await dispatch(updateSupplier({ id: editingId, payload: updatePayload })).unwrap()
         setSnackbar({ open: true, message: 'Supplier updated', severity: 'success' })
       } else {
-        await dispatch(createSupplier(form)).unwrap()
+        await dispatch(createSupplier(payload)).unwrap()
         setSnackbar({ open: true, message: 'Supplier created', severity: 'success' })
       }
       setOpenForm(false)
@@ -167,7 +180,7 @@ export default function Suppliers() {
       >
         <Stack spacing={2} mt={1}>
           <TextField label="Name" error={!!errors.name} helperText={errors.name?.message} {...register('name', { required: 'Name is required' })} />
-          <TextField label="Email" error={!!errors.email} helperText={errors.email?.message} {...register('email', { required: 'Email is required' })} />
+          <TextField label="Email" error={!!errors.email} helperText={errors.email?.message} {...register('email')} />
           <TextField label="Phone" {...register('phone')} />
           <TextField label="Address" {...register('address')} />
         </Stack>

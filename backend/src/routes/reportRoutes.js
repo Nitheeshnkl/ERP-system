@@ -5,7 +5,7 @@ const reportController = require('../controllers/reportController');
 
 router.use(checkAuth);
 
-router.get('/sales', checkRole('Admin', 'Sales', 'Purchase'), reportController.exportSalesCsv);
+router.get('/sales', checkRole('Admin', 'Sales', 'Purchase', 'Inventory'), reportController.exportSalesCsv);
 router.get('/invoices', checkRole('Admin', 'Sales', 'Purchase'), reportController.exportInvoicesCsv);
 
 module.exports = router;

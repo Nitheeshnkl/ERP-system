@@ -14,18 +14,57 @@ import {
   Chip,
   CircularProgress,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from '@mui/material'
+import { useState } from 'react'
 import { Visibility as VisibilityIcon, Download as DownloadIcon } from '@mui/icons-material'
 import { RootState, AppDispatch } from '../app/store'
 import { fetchGRNs, clearError } from '../features/orders/ordersSlice'
+import axiosInstance from '../services/axiosInstance'
 
 export default function GRN() {
   const dispatch = useDispatch<AppDispatch>()
   const { grns, loading, error } = useSelector((state: RootState) => state.orders)
+  const [selectedGrn, setSelectedGrn] = useState<any>(null)
+  const [openView, setOpenView] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
     dispatch(fetchGRNs())
   }, [dispatch])
+
+  const handleView = async (id: string) => {
+    try {
+      setActionError(null)
+      const response = await axiosInstance.get(`/grn/${id}`)
+      setSelectedGrn(response.data)
+      setOpenView(true)
+    } catch (requestError: any) {
+      setActionError(requestError.response?.data?.message || 'Unable to load GRN details')
+    }
+  }
+
+  const handleDownload = async (id: string) => {
+    try {
+      setActionError(null)
+      const response = await axiosInstance.get(`/grn/${id}`)
+      const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' })
+      const blobUrl = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = blobUrl
+      link.download = `grn-${id}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(blobUrl)
+    } catch (requestError: any) {
+      setActionError(requestError.response?.data?.message || 'Unable to download GRN file')
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (String(status || '').toLowerCase()) {
@@ -44,9 +83,9 @@ export default function GRN() {
 
   return (
     <Box>
-      {error && (
-        <Alert severity="error" onClose={() => dispatch(clearError())} sx={{ mb: 3 }}>
-          {error}
+      {(error || actionError) && (
+        <Alert severity="error" onClose={() => { dispatch(clearError()); setActionError(null) }} sx={{ mb: 3 }}>
+          {error || actionError}
         </Alert>
       )}
 
@@ -104,10 +143,10 @@ export default function GRN() {
                     <Chip label={status} color={getStatusColor(status)} size="small" />
                   </TableCell>
                   <TableCell align="right">
-                    <IconButton size="small" title="View Details">
+                    <IconButton size="small" title="View Details" onClick={() => handleView(id)}>
                       <VisibilityIcon />
                     </IconButton>
-                    <IconButton size="small" title="Download">
+                    <IconButton size="small" title="Download" onClick={() => handleDownload(id)}>
                       <DownloadIcon />
                     </IconButton>
                   </TableCell>
@@ -118,6 +157,20 @@ export default function GRN() {
           </Table>
         </TableContainer>
       )}
+
+      <Dialog open={openView} onClose={() => setOpenView(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>GRN Details</DialogTitle>
+        <DialogContent dividers>
+          {selectedGrn ? (
+            <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{JSON.stringify(selectedGrn, null, 2)}</pre>
+          ) : (
+            <Typography color="textSecondary">No details available.</Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenView(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

@@ -44,7 +44,7 @@ interface LineItem {
   productId: string
   productName?: string
   quantity: number
-  unitPrice: number
+  unitPrice: number | ''
 }
 
 export default function SalesOrders() {
@@ -69,7 +69,7 @@ export default function SalesOrders() {
 
   // Calculate total from items
   const totalAmount = useMemo(() => {
-    return formData.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0)
+    return formData.items.reduce((sum, item) => sum + (Number(item.quantity) * (Number(item.unitPrice) || 0)), 0)
   }, [formData.items])
 
   const canCreateEdit = hasAnyRole(user?.role, ['Admin', 'Sales'])
@@ -95,7 +95,7 @@ export default function SalesOrders() {
             productId: item.productId?._id || item.productId || '',
             productName: item.productName || item.productId?.name || '',
             quantity: Number(item.quantity) || 1,
-            unitPrice: Number(item.unitPrice) || 0,
+            unitPrice: item.unitPrice === '' ? '' : (Number(item.unitPrice) || 0),
           }))
         : []
       
@@ -228,7 +228,7 @@ export default function SalesOrders() {
           id: `temp-${Date.now()}`,
           productId: '',
           quantity: 1,
-          unitPrice: 0,
+          unitPrice: '',
         },
       ],
     }))
@@ -432,12 +432,19 @@ export default function SalesOrders() {
                           type="number"
                           inputProps={{ min: 0 }}
                           value={item.unitPrice}
-                          onChange={(e) => handleUpdateItem(index, 'unitPrice', Number(e.target.value) || 0)}
+                          onChange={(e) => {
+                            const value = e.target.value
+                            if (value === '') {
+                              handleUpdateItem(index, 'unitPrice', '')
+                              return
+                            }
+                            handleUpdateItem(index, 'unitPrice', Number(value))
+                          }}
                         />
                       </Box>
                       <Box sx={{ flex: 1 }}>
                         <Typography sx={{ fontWeight: 500 }}>
-                          ${(item.quantity * item.unitPrice).toLocaleString()}
+                          ${(Number(item.quantity) * (Number(item.unitPrice) || 0)).toLocaleString()}
                         </Typography>
                       </Box>
                       <Box sx={{ width: 40 }}>

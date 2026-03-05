@@ -9,6 +9,7 @@ const paginationQuerySchema = Joi.object({
 const productCreateSchema = Joi.object({
   name: Joi.string().trim().min(1).required(),
   sku: Joi.string().trim().min(1).required(),
+  description: Joi.string().trim().allow('', null),
   price: Joi.number().min(0).required(),
   stockQuantity: Joi.number().integer().min(0).default(0),
 });
@@ -16,6 +17,7 @@ const productCreateSchema = Joi.object({
 const productUpdateSchema = Joi.object({
   name: Joi.string().trim().min(1),
   sku: Joi.string().trim().min(1),
+  description: Joi.string().trim().allow('', null),
   price: Joi.number().min(0),
   stockQuantity: Joi.number().integer().min(0),
 }).min(1);

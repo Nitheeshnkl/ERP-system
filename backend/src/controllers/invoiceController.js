@@ -1,6 +1,8 @@
 const Invoice = require('../models/Invoice');
+const SalesOrder = require('../models/SalesOrder');
 const path = require('path');
 const fs = require('fs');
+const PDFDocument = require('pdfkit');
 const { success, error } = require('../utils/response');
 const { getPaginationOptions, buildSearchFilter, buildMeta } = require('../utils/pagination');
 
@@ -65,17 +67,56 @@ exports.updateInvoiceStatus = async (req, res) => {
 
 exports.getInvoicePDF = async (req, res) => {
   try {
-    const invoice = await Invoice.findById(req.params.id);
+    const invoice = await Invoice.findById(req.params.id).populate({ path: 'salesOrderId', select: 'customerName items totalAmount status createdAt' });
     if (!invoice) {
       return error(res, 'Invoice not found', 404);
     }
 
-    const filePath = path.resolve(invoice.pdfPath);
-    if (fs.existsSync(filePath)) {
+    const filePath = invoice.pdfPath ? path.resolve(invoice.pdfPath) : '';
+    if (filePath && fs.existsSync(filePath)) {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="invoice-${invoice._id}.pdf"`);
       return res.sendFile(filePath);
     }
 
-    return error(res, 'PDF file not found on server', 404);
+    const salesOrder = invoice.salesOrderId && invoice.salesOrderId._id
+      ? invoice.salesOrderId
+      : await SalesOrder.findById(invoice.salesOrderId).select('customerName items totalAmount status createdAt');
+
+    const doc = new PDFDocument({ margin: 50 });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="invoice-${invoice._id}.pdf"`);
+    doc.pipe(res);
+
+    doc.fontSize(20).text('Invoice', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(11).text(`Invoice ID: ${invoice._id}`);
+    doc.text(`Date: ${invoice.createdAt ? new Date(invoice.createdAt).toISOString().split('T')[0] : '-'}`);
+    doc.text(`Customer: ${salesOrder?.customerName || 'N/A'}`);
+    doc.text(`Order ID: ${salesOrder?._id || invoice.salesOrderId || 'N/A'}`);
+    doc.text(`Payment Status: ${invoice.paymentStatus || 'Pending'}`);
+    doc.moveDown();
+
+    doc.fontSize(12).text('Items', { underline: true });
+    doc.moveDown(0.5);
+    const items = Array.isArray(salesOrder?.items) ? salesOrder.items : [];
+    if (items.length === 0) {
+      doc.fontSize(10).text('No line items available');
+    } else {
+      items.forEach((item, index) => {
+        const lineAmount = Number(item.quantity || 0) * Number(item.unitPrice || 0);
+        doc
+          .fontSize(10)
+          .text(
+            `${index + 1}. ${item.productName || 'Product'} | Qty: ${Number(item.quantity || 0)} | Unit: ${Number(item.unitPrice || 0)} | Amount: ${lineAmount}`
+          );
+      });
+    }
+
+    doc.moveDown();
+    doc.fontSize(12).text(`Total Amount: ${Number(invoice.amount || salesOrder?.totalAmount || 0)}`, { align: 'right' });
+    doc.end();
+    return;
   } catch (requestError) {
     return error(res, requestError.message, 500);
   }
