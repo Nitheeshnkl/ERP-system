@@ -98,10 +98,11 @@ export default function Auth() {
     if (register.fulfilled.match(result)) {
       setValidationError('')
       setSignUpName('')
+      const registeredEmail = signUpEmail.trim()
       setSignUpEmail('')
       setSignUpPassword('')
       setSignUpRole('Inventory')
-      setTabValue(0)
+      navigate('/verify-email', { state: { email: registeredEmail } })
     }
   }
 

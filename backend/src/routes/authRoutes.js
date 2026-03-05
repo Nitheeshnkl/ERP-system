@@ -7,6 +7,7 @@ const { ensureAdminAssignsAdminRole } = require('../middleware/rbac');
 
 // Public endpoints
 router.post('/register', authRateLimiter, ensureAdminAssignsAdminRole, authController.register);
+router.post('/verify-email', authRateLimiter, authController.verifyEmail);
 router.post('/login', authRateLimiter, authController.login);
 router.post('/logout', authController.logout);
 

@@ -2,6 +2,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { success, error } = require('../utils/response');
 const { canonicalizeRole, normalizeRole } = require('../utils/roles');
+const { sendVerificationEmail } = require('../../utils/sendEmail');
 
 const getJwtSecret = () => {
   const jwtSecret = (process.env.JWT_SECRET || '').trim();
@@ -57,27 +58,59 @@ exports.register = async (req, res) => {
       }
     }
 
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
     const user = new User({
       name,
       email: email.toLowerCase(),
       password,
-      role: requestedRole === 'admin' ? 'Admin' : normalizedRole
+      role: requestedRole === 'admin' ? 'Admin' : normalizedRole,
+      emailVerified: false,
+      emailOTP: otp,
+      otpExpires: new Date(Date.now() + 10 * 60 * 1000),
     });
 
     await user.save();
+    await sendVerificationEmail(user.email, otp);
 
-    const userResponse = {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role
-    };
-
-    return success(res, userResponse, 'User registered successfully', 201);
+    return success(res, null, 'Verification OTP sent to email', 201);
   } catch (requestError) {
     console.error('Register error:', requestError);
     const isProduction = process.env.NODE_ENV === 'production';
     return error(res, isProduction ? 'Registration failed' : requestError.message, 500);
+  }
+};
+
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return error(res, 'Email and OTP are required', 400);
+    }
+
+    const user = await User.findOne({ email: String(email).toLowerCase() });
+    if (!user) {
+      return error(res, 'Invalid email or OTP', 400);
+    }
+
+    if (!user.emailOTP || user.emailOTP !== String(otp)) {
+      return error(res, 'Invalid email or OTP', 400);
+    }
+
+    if (!user.otpExpires || new Date(user.otpExpires).getTime() < Date.now()) {
+      return error(res, 'OTP has expired', 400);
+    }
+
+    user.emailVerified = true;
+    user.emailOTP = null;
+    user.otpExpires = null;
+    await user.save();
+
+    return success(res, null, 'Email verified successfully');
+  } catch (requestError) {
+    const isProduction = process.env.NODE_ENV === 'production';
+    return error(res, isProduction ? 'Email verification failed' : requestError.message, 500);
   }
 };
 
@@ -104,6 +137,10 @@ exports.login = async (req, res) => {
 
     if (!user || !(await user.comparePassword(password))) {
       return error(res, 'Invalid credentials', 401);
+    }
+
+    if (user.emailVerified === false) {
+      return error(res, 'Please verify your email before logging in', 403);
     }
 
     const canonicalUserRole = canonicalizeRole(user.role) || 'Inventory';

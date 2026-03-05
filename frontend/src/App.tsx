@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import { initSocketClient } from './services/socketClient'
 
 const Auth = lazy(() => import('./pages/Auth'))
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'))
 const Unauthorized = lazy(() => import('./pages/Unauthorized'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Customers = lazy(() => import('./pages/Customers'))
@@ -47,6 +48,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Auth />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
         <Route
