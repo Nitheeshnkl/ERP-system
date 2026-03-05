@@ -8,6 +8,7 @@ const TOKEN_KEY = 'auth_token'
 interface AuthState {
   user: User | null
   isAuthenticated: boolean
+  initialized: boolean
   loading: boolean
   error: string | null
 }
@@ -15,13 +16,14 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
-  loading: true,
+  initialized: false,
+  loading: false,
   error: null,
 }
 
 export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { rejectWithValue }) => {
   try {
-    const response = await axiosInstance.get('/auth/me')
+    const response = await axiosInstance.get('/auth/me', { timeout: 7_000 })
     return response.data
   } catch (error: unknown) {
     localStorage.removeItem(TOKEN_KEY)
@@ -85,6 +87,7 @@ const authSlice = createSlice({
     forceLogout(state) {
       state.user = null
       state.isAuthenticated = false
+      state.initialized = true
       state.error = null
       state.loading = false
     },
@@ -99,11 +102,13 @@ const authSlice = createSlice({
       .addCase(checkAuth.fulfilled, (state, action) => {
         state.user = action.payload
         state.isAuthenticated = true
+        state.initialized = true
         state.loading = false
       })
       .addCase(checkAuth.rejected, (state) => {
         state.user = null
         state.isAuthenticated = false
+        state.initialized = true
         state.loading = false
       })
 

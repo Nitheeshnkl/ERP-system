@@ -36,7 +36,13 @@ function isRoleAllowed(userRole: string | undefined, allowedRoles: string[] | un
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth)
+  const { isAuthenticated, user, loading, initialized } = useSelector((state: RootState) => state.auth)
+  const hasToken = Boolean(localStorage.getItem('auth_token'))
+
+  // Avoid redirect flicker while validating an existing session token.
+  if (hasToken && (!initialized || loading) && !isAuthenticated) {
+    return <div style={{ display: 'grid', placeItems: 'center', height: '100vh' }}>Loading...</div>
+  }
 
   // If not authenticated, redirect to login
   if (!isAuthenticated) {

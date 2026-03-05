@@ -21,10 +21,14 @@ const Invoices = lazy(() => import('./pages/Invoices'))
 function App() {
   const dispatch = useDispatch<AppDispatch>()
   const navigate = useNavigate()
-  const { loading } = useSelector((state: RootState) => state.auth)
+  const { initialized } = useSelector((state: RootState) => state.auth)
 
   useEffect(() => {
-    dispatch(checkAuth())
+    const hasToken = Boolean(localStorage.getItem('auth_token'))
+    if (hasToken && !initialized) {
+      // Bootstrap auth in the background; do not block first paint.
+      dispatch(checkAuth())
+    }
     initSocketClient().catch(() => {})
 
     const onUnauthorized = () => {
@@ -36,11 +40,7 @@ function App() {
     return () => {
       window.removeEventListener('auth:unauthorized', onUnauthorized)
     }
-  }, [dispatch, navigate])
-
-  if (loading) {
-    return <div style={{ display: 'grid', placeItems: 'center', height: '100vh' }}>Loading...</div>
-  }
+  }, [dispatch, initialized, navigate])
 
   return (
     <Suspense fallback={<div style={{ display: 'grid', placeItems: 'center', height: '100vh' }}>Loading page...</div>}>
