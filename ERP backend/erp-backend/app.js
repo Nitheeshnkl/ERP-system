@@ -5,6 +5,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./src/config/db');
+const createSuperAdmin = require('./src/utils/createSuperAdmin');
 const { success, error } = require('./src/utils/response');
 const { notFoundHandler, errorHandler } = require('./src/middleware/errorHandler');
 const { apiRateLimiter } = require('./src/middleware/rateLimit');
@@ -136,6 +137,7 @@ const startServer = async () => {
   try {
     validateEnv();
     await connectDB();
+    await createSuperAdmin();
 
     server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`ERP backend listening on port ${PORT}`);

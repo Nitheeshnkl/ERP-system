@@ -28,29 +28,7 @@ exports.register = async (req, res) => {
     }
 
     if (requestedRole === 'admin') {
-      let token = req.cookies?.token;
-      if (!token) {
-        const authHeader = req.headers.authorization;
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-          token = authHeader.substring(7);
-        }
-      }
-
-      if (!token) {
-        return error(res, 'Admin accounts cannot be created via public signup', 403);
-      }
-
-      let decoded;
-      try {
-        decoded = jwt.verify(token, JWT_SECRET);
-      } catch (_tokenError) {
-        return error(res, 'Admin accounts cannot be created via public signup', 403);
-      }
-
-      const requester = await User.findById(decoded.id).select('role');
-      if (!requester || String(requester.role).toLowerCase() !== 'admin') {
-        return error(res, 'Admin accounts cannot be created via public signup', 403);
-      }
+      return error(res, 'Admin accounts cannot be created from signup', 403);
     }
 
     const user = new User({
