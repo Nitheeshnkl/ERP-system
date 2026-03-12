@@ -2,7 +2,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { success, error } = require('../utils/response');
 const { canonicalizeRole, normalizeRole } = require('../utils/roles');
-const { sendVerificationEmail } = require('../../utils/sendEmail');
+const { sendOTPEmail } = require('../../utils/sendOTPEmail');
 
 const getJwtSecret = () => {
   const jwtSecret = (process.env.JWT_SECRET || '').trim();
@@ -70,7 +70,7 @@ exports.register = async (req, res) => {
       otpExpires: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    await sendVerificationEmail(user.email, otp);
+    await sendOTPEmail(user.email, otp);
     await user.save();
 
     return success(res, null, 'Verification OTP sent to email', 201);
