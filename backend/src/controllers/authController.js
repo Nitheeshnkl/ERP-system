@@ -70,8 +70,8 @@ exports.register = async (req, res) => {
       otpExpires: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    await user.save();
     await sendVerificationEmail(user.email, otp);
+    await user.save();
 
     return success(res, null, 'Verification OTP sent to email', 201);
   } catch (requestError) {
