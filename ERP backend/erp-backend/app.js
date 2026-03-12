@@ -137,8 +137,8 @@ const startServer = async () => {
     validateEnv();
     await connectDB();
 
-    server = app.listen(PORT, () => {
-      console.log(`ERP backend listening on http://localhost:${PORT}`);
+    server = app.listen(PORT, '0.0.0.0', () => {
+      console.log(`ERP backend listening on port ${PORT}`);
       console.log(`Allowed CORS origins: ${uniqueAllowedOrigins.join(', ')}`);
     });
 
