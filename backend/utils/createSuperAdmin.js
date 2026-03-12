@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt');
 const User = require('../src/models/User');
 
 const createSuperAdmin = async () => {
@@ -16,12 +15,10 @@ const createSuperAdmin = async () => {
     const existingAdmin = await User.findOne({ email: normalizedEmail });
 
     if (!existingAdmin) {
-      const hashedPassword = await bcrypt.hash(adminPassword, 10);
-
       await User.create({
         name: adminName || 'System Admin',
         email: normalizedEmail,
-        password: hashedPassword,
+        password: adminPassword,
         role: 'Admin',
         emailVerified: true,
       });

@@ -113,7 +113,12 @@ exports.login = async (req, res) => {
       });
     }
 
-    if (!user || !(await user.comparePassword(password))) {
+    console.log('Entered password:', password);
+    console.log('Stored hash:', user?.password);
+    const passwordMatches = user ? await user.comparePassword(password) : false;
+    console.log('Password match:', passwordMatches);
+
+    if (!user || !passwordMatches) {
       return error(res, 'Invalid credentials', 401);
     }
 
