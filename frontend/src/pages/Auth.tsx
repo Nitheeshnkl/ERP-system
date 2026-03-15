@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Box,
   Container,
@@ -45,6 +45,7 @@ function TabPanel(props: TabPanelProps) {
 export default function Auth() {
   const dispatch = useDispatch<AppDispatch>()
   const navigate = useNavigate()
+  const location = useLocation()
   const { isAuthenticated, loading, error } = useSelector((state: RootState) => state.auth)
 
   const [tabValue, setTabValue] = useState(0)
@@ -65,6 +66,14 @@ export default function Auth() {
       navigate('/')
     }
   }, [isAuthenticated, navigate])
+
+  useEffect(() => {
+    const state = location.state as { openSignup?: boolean; prefillEmail?: string } | null
+    if (state?.openSignup) {
+      setTabValue(1)
+      setSignUpEmail(state.prefillEmail || '')
+    }
+  }, [location.state])
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue)
@@ -103,7 +112,7 @@ export default function Auth() {
       setSignUpEmail('')
       setSignUpPassword('')
       setSignUpRole('Inventory')
-      navigate('/verify-email', { state: { email: registeredEmail, otpSent: response?.success === true } })
+      navigate('/verify-email', { state: { email: registeredEmail, showVerifyModal: response?.success === true } })
     }
   }
 

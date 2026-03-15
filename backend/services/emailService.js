@@ -34,13 +34,14 @@ const sendOTPEmail = async (email, otp) => {
     const msg = {
       to: email,
       from,
-      subject: 'Verify your email for ERP System',
-      text: `Your OTP code is ${otp}. This OTP will expire in 5 minutes.`,
+      subject: 'Verify Your Email - ERP System',
+      text: `Hello, your OTP is ${otp}. It will expire in 5 minutes. If you did not request this, you can ignore this email.`,
       html: `
         <div style="font-family: Arial, sans-serif; padding:20px;">
           <h2 style="color:#2563eb;">ERP System Email Verification</h2>
           <p>Hello,</p>
-          <p>To complete your signup, please use the One-Time Password (OTP) below:</p>
+          <p>Welcome to ERP System!</p>
+          <p>Please verify your email address using the One-Time Password (OTP) below:</p>
           <div style="
             font-size:28px;
             font-weight:bold;
@@ -51,14 +52,14 @@ const sendOTPEmail = async (email, otp) => {
             ${otp}
           </div>
           <p>This OTP will expire in <strong>5 minutes</strong>.</p>
-          <p>If you did not request this verification, please ignore this email.</p>
+          <p>If you did not create this account, please ignore this email.</p>
           <hr style="margin:20px 0"/>
           <p style="font-size:12px;color:#6b7280;">
             If the email appears in your spam folder, please mark it as
             "Not Spam" so future emails arrive in your inbox.
           </p>
           <p style="font-size:12px;color:#6b7280;">
-            ERP System – Secure Business Management Platform
+            ERP System Team
           </p>
         </div>
       `
