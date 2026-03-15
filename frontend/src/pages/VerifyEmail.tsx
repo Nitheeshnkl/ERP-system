@@ -38,7 +38,7 @@ export default function VerifyEmail() {
 
     try {
       setLoading(true)
-      await axiosInstance.post('/auth/verify-otp', { email: email.trim(), otp: otp.trim() })
+      await axiosInstance.post('/auth/verify-email', { email: email.trim(), otp: otp.trim() })
       setSuccess('Email verified successfully')
       window.setTimeout(() => {
         navigate('/login', { replace: true })

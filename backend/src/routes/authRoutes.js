@@ -9,6 +9,7 @@ const { ensureAdminAssignsAdminRole } = require('../middleware/rbac');
 router.post('/register', authRateLimiter, ensureAdminAssignsAdminRole, authController.register);
 router.post('/signup', authRateLimiter, ensureAdminAssignsAdminRole, authController.register);
 router.post('/verify-otp', authRateLimiter, authController.verifyOtp);
+router.post('/verify-email', authRateLimiter, authController.verifyOtp);
 router.post('/login', authRateLimiter, authController.login);
 router.post('/logout', authController.logout);
 
