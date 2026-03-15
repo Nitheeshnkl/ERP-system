@@ -15,12 +15,12 @@ services:
 
   backend:
     build:
-      context: ./ERP backend/erp-backend
+      context: ./backend
       dockerfile: Dockerfile
     container_name: erp-backend
     restart: unless-stopped
     env_file:
-      - ./ERP backend/erp-backend/.env
+      - ./backend/.env
     environment:
       PORT: 5000
       MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/erp}
@@ -34,7 +34,7 @@ services:
 
   frontend:
     build:
-      context: ./ ERP frontend
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: erp-frontend
     restart: unless-stopped

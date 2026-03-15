@@ -35,8 +35,8 @@ This repository includes:
 .
 ├── backend/                     # Backend app (canonical layout)
 ├── frontend/                    # Frontend app (canonical layout)
-├── ERP backend/erp-backend/     # Active backend path in this workspace
-├──  ERP frontend/               # Active frontend path in this workspace
+├── backend/                    # Active backend path in this workspace
+├── frontend/                   # Active frontend path in this workspace
 ├── .github/workflows/           # CI workflow(s)
 ├── docker-compose.yml
 ├── API_DOCUMENTATION.md
@@ -54,15 +54,18 @@ This repository includes:
 
 ### Backend
 Create `.env` from template:
-- `ERP backend/erp-backend/.env.example`
+- `backend/.env.example`
 
 Required values:
 - `MONGODB_URI` (or `DB_URI` / `MONGO_URI`)
 - `JWT_SECRET`
+- `SENDGRID_API_KEY`
+- `EMAIL_FROM`
+- `BACKEND_URL`
 
 ### Frontend
 Create `.env.local` from template:
-- ` ERP frontend/.env.example`
+- `frontend/.env.example`
 
 Typical values:
 - `VITE_API_URL=http://localhost:8000`
@@ -72,26 +75,36 @@ Typical values:
 
 ### 1) Install Dependencies
 ```bash
-cd "ERP backend/erp-backend"
+cd "backend"
 npm install
 
-cd "../../ ERP frontend"
+cd "../frontend"
 npm install
 ```
 
 ### 2) Run Backend
 ```bash
-cd "ERP backend/erp-backend"
+cd "backend"
 npm run dev
 ```
 Backend default: `http://localhost:8000`
 
 ### 3) Run Frontend
 ```bash
-cd " ERP frontend"
+cd "frontend"
 npm run dev -- --host 127.0.0.1
 ```
 Frontend default: `http://127.0.0.1:5173`
+
+## SendGrid Email Verification Setup
+Steps:
+1. Create a SendGrid account.
+2. Verify a sender identity (single sender or domain).
+3. Create a SendGrid API key with Mail Send permissions.
+4. Add the following to `backend/.env`:
+   - `SENDGRID_API_KEY=<your_sendgrid_api_key>`
+   - `EMAIL_FROM=noreply@yourdomain.com`
+   - `BACKEND_URL=https://your-backend-domain.com`
 
 ## Docker Setup
 Run full stack:
@@ -113,19 +126,19 @@ docker-compose down
 
 ### Backend Tests
 ```bash
-cd "ERP backend/erp-backend"
+cd "backend"
 npm test
 ```
 
 ### Frontend Tests
 ```bash
-cd " ERP frontend"
+cd "frontend"
 npm test
 ```
 
 ### Frontend Type Check
 ```bash
-cd " ERP frontend"
+cd "frontend"
 npm run type-check
 ```
 

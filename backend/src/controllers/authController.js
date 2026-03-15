@@ -1,8 +1,9 @@
 const User = require('../models/User');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { success, error } = require('../utils/response');
 const { canonicalizeRole, normalizeRole } = require('../utils/roles');
-const { sendOTPEmail } = require('../../utils/sendOTPEmail');
+const { sendVerificationEmail } = require('../../services/emailService');
 
 const getJwtSecret = () => {
   const jwtSecret = (process.env.JWT_SECRET || '').trim();
@@ -10,6 +11,14 @@ const getJwtSecret = () => {
     throw new Error('Missing required environment variable: JWT_SECRET');
   }
   return jwtSecret;
+};
+
+const getBackendUrl = () => {
+  const backendUrl = (process.env.BACKEND_URL || '').trim();
+  if (!backendUrl) {
+    throw new Error('Missing required environment variable: BACKEND_URL');
+  }
+  return backendUrl.replace(/\/+$/, '');
 };
 
 exports.register = async (req, res) => {
@@ -36,22 +45,29 @@ exports.register = async (req, res) => {
       return error(res, 'Admin accounts cannot be created from signup', 403);
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationToken = crypto.randomBytes(32).toString('hex');
 
     const user = new User({
       name,
       email: email.toLowerCase(),
       password,
       role: requestedRole === 'admin' ? 'Admin' : normalizedRole,
+      isVerified: false,
       emailVerified: false,
-      emailOTP: otp,
-      otpExpires: new Date(Date.now() + 10 * 60 * 1000),
+      verificationToken
     });
 
-    await sendOTPEmail(user.email, otp);
     await user.save();
 
-    return success(res, null, 'Verification OTP sent to email', 201);
+    const verificationUrl = `${getBackendUrl()}/api/auth/verify-email?token=${verificationToken}`;
+    try {
+      await sendVerificationEmail(user.email, verificationUrl);
+    } catch (sendError) {
+      await User.deleteOne({ _id: user._id });
+      throw sendError;
+    }
+
+    return success(res, null, 'Verification email sent', 201);
   } catch (requestError) {
     console.error('Register error:', requestError);
     const isProduction = process.env.NODE_ENV === 'production';
@@ -61,28 +77,20 @@ exports.register = async (req, res) => {
 
 exports.verifyEmail = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { token } = req.query;
 
-    if (!email || !otp) {
-      return error(res, 'Email and OTP are required', 400);
+    if (!token) {
+      return error(res, 'Verification token is required', 400);
     }
 
-    const user = await User.findOne({ email: String(email).toLowerCase() });
+    const user = await User.findOne({ verificationToken: String(token) });
     if (!user) {
-      return error(res, 'Invalid email or OTP', 400);
+      return error(res, 'Invalid or expired verification token', 400);
     }
 
-    if (!user.emailOTP || user.emailOTP !== String(otp)) {
-      return error(res, 'Invalid email or OTP', 400);
-    }
-
-    if (!user.otpExpires || new Date(user.otpExpires).getTime() < Date.now()) {
-      return error(res, 'OTP has expired', 400);
-    }
-
+    user.isVerified = true;
     user.emailVerified = true;
-    user.emailOTP = null;
-    user.otpExpires = null;
+    user.verificationToken = null;
     await user.save();
 
     return success(res, null, 'Email verified successfully');
@@ -122,7 +130,8 @@ exports.login = async (req, res) => {
       return error(res, 'Invalid credentials', 401);
     }
 
-    if (user.emailVerified === false && String(user.role).toLowerCase() !== 'admin') {
+    const isEmailVerified = user.isVerified !== false && user.emailVerified !== false;
+    if (!isEmailVerified && String(user.role).toLowerCase() !== 'admin') {
       return error(res, 'Please verify your email before logging in', 403);
     }
 

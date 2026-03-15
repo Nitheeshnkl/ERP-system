@@ -2,7 +2,7 @@
 
 const path = require('path');
 
-const jwt = require(path.resolve(__dirname, '../ERP backend/erp-backend/node_modules/jsonwebtoken'));
+const jwt = require(path.resolve(__dirname, '../backend/node_modules/jsonwebtoken'));
 
 const BASE_URL = 'http://127.0.0.1:8000/api';
 const JWT_SECRET = 'tempdevsecret';

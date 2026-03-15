@@ -27,7 +27,7 @@ This document provides a comprehensive overview of the Enterprise Resource Plann
 
 ```
 ERP system/
-├── ERP frontend/                 # React Vite application
+├── frontend/                    # React Vite application
 │   ├── src/
 │   │   ├── app/                 # Redux store configuration
 │   │   ├── components/          # Reusable components (ProtectedRoute, Layout, etc.)
@@ -390,7 +390,7 @@ checkRole('Admin', ...)     - Authorization check
 
 ### Frontend Setup
 ```bash
-cd " ERP frontend"
+cd "frontend"
 npm install
 npm run dev
 ```
@@ -399,7 +399,7 @@ npm run dev
 
 ### Backend Setup
 ```bash
-cd "ERP backend/erp-backend"
+cd "backend"
 npm install
 npm run dev
 ```

@@ -74,7 +74,11 @@ const seedDemoMetadata = async () => {
 const connectDB = async () => {
   try {
     const dbUri = process.env.MONGODB_URI || process.env.DB_URI || process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/erp';
-    const conn = await mongoose.connect(dbUri);
+    console.log(`Connecting to MongoDB: ${dbUri}`);
+    const conn = await mongoose.connect(dbUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
 
     if (shouldSeedDemoCredentials()) {
