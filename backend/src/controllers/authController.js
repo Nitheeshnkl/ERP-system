@@ -60,14 +60,13 @@ exports.register = async (req, res) => {
       expiresAt: new Date(Date.now() + 5 * 60 * 1000)
     });
 
-    try {
-      await sendOTPEmail(normalizedEmail, otp);
-    } catch (sendError) {
+    const emailSent = await sendOTPEmail(normalizedEmail, otp);
+    if (!emailSent) {
       await OtpVerification.deleteMany({ email: normalizedEmail });
-      throw sendError;
+      return error(res, 'Failed to send OTP email', 500);
     }
 
-    return success(res, null, 'OTP sent to email', 201);
+    return success(res, null, 'OTP sent successfully', 201);
   } catch (requestError) {
     console.error('Register error:', requestError);
     const isProduction = process.env.NODE_ENV === 'production';

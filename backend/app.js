@@ -9,6 +9,7 @@ const createSuperAdmin = require('./utils/createSuperAdmin');
 const { success, error } = require('./src/utils/response');
 const { notFoundHandler, errorHandler } = require('./src/middleware/errorHandler');
 const { apiRateLimiter } = require('./src/middleware/rateLimit');
+const { sendOTPEmail } = require('./services/emailService');
 
 // Route imports
 const authRoutes = require('./src/routes/authRoutes');
@@ -106,6 +107,14 @@ app.get('/ready', (_req, res) => {
     status: 'ready',
     db: 'connected',
   }, 'Readiness check completed');
+});
+
+app.get('/test-email', async (_req, res) => {
+  const result = await sendOTPEmail('yourtestemail@gmail.com', '123456');
+  if (result) {
+    return res.json({ success: true });
+  }
+  return res.status(500).json({ success: false });
 });
 
 // Routes

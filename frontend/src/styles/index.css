@@ -42,3 +42,36 @@ a {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+.otp-notification {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: white;
+  border-left: 4px solid #16a34a;
+  color: #1f2937;
+  padding: 16px 18px;
+  width: 320px;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  font-family: system-ui, sans-serif;
+  z-index: 9999;
+}
+
+.otp-notification-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #16a34a;
+  margin-bottom: 6px;
+}
+
+.otp-notification-body {
+  font-size: 14px;
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.otp-notification-footer {
+  font-size: 12px;
+  color: #6b7280;
+}
