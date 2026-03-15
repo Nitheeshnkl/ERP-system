@@ -24,35 +24,28 @@ const ensureSendgridInitialized = () => {
   sendgridInitialized = true;
 };
 
-const sendVerificationEmail = async (email, verificationUrl) => {
+const sendOTPEmail = async (email, otp) => {
   try {
     ensureSendgridInitialized();
     const msg = {
       to: email,
       from: getEmailFrom(),
-      subject: 'Verify your ERP account',
+      subject: 'ERP System Email Verification OTP',
       html: `
-        <h2>Welcome to ERP System</h2>
-        <p>Please verify your email to activate your account.</p>
-        <a href="${verificationUrl}" style="
-          padding:10px 20px;
-          background:#2563eb;
-          color:white;
-          text-decoration:none;
-          border-radius:6px;
-        ">
-          Verify Email
-        </a>
+        <h2>Email Verification</h2>
+        <p>Your OTP for ERP signup is:</p>
+        <h1>${otp}</h1>
+        <p>This OTP expires in 5 minutes.</p>
       `
     };
 
     await sgMail.send(msg);
   } catch (sendError) {
-    console.error('SendGrid verification email error:', sendError);
-    throw new Error('Failed to send verification email');
+    console.error('SendGrid OTP email error:', sendError);
+    throw new Error('Failed to send OTP email');
   }
 };
 
 module.exports = {
-  sendVerificationEmail
+  sendOTPEmail
 };

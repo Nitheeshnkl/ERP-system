@@ -1,9 +1,11 @@
 const User = require('../models/User');
-const crypto = require('crypto');
+const OtpVerification = require('../models/OtpVerification');
+const bcrypt = require('bcrypt');
+const otpGenerator = require('otp-generator');
 const jwt = require('jsonwebtoken');
 const { success, error } = require('../utils/response');
 const { canonicalizeRole, normalizeRole } = require('../utils/roles');
-const { sendVerificationEmail } = require('../../services/emailService');
+const { sendOTPEmail } = require('../../services/emailService');
 
 const getJwtSecret = () => {
   const jwtSecret = (process.env.JWT_SECRET || '').trim();
@@ -13,17 +15,8 @@ const getJwtSecret = () => {
   return jwtSecret;
 };
 
-const getBackendUrl = () => {
-  const backendUrl = (process.env.BACKEND_URL || '').trim();
-  if (!backendUrl) {
-    throw new Error('Missing required environment variable: BACKEND_URL');
-  }
-  return backendUrl.replace(/\/+$/, '');
-};
-
 exports.register = async (req, res) => {
   try {
-    const JWT_SECRET = getJwtSecret();
     const { name, email, password, role } = req.body;
     const requestedRole = normalizeRole(role);
     const normalizedRole = role ? canonicalizeRole(role) : 'Inventory';
@@ -36,7 +29,8 @@ exports.register = async (req, res) => {
       return error(res, 'Invalid role. Allowed roles: Admin, Sales, Purchase, Inventory', 400);
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const normalizedEmail = email.toLowerCase();
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return error(res, 'Email already registered', 409);
     }
@@ -45,29 +39,35 @@ exports.register = async (req, res) => {
       return error(res, 'Admin accounts cannot be created from signup', 403);
     }
 
-    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const otp = otpGenerator.generate(6, {
+      digits: true,
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false
+    });
+    const passwordHash = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 10);
 
-    const user = new User({
-      name,
-      email: email.toLowerCase(),
-      password,
-      role: requestedRole === 'admin' ? 'Admin' : normalizedRole,
-      isVerified: false,
-      emailVerified: false,
-      verificationToken
+    await OtpVerification.deleteMany({ email: normalizedEmail });
+    await OtpVerification.create({
+      email: normalizedEmail,
+      otp,
+      signupData: {
+        name,
+        email: normalizedEmail,
+        password: passwordHash,
+        role: requestedRole === 'admin' ? 'Admin' : normalizedRole
+      },
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000)
     });
 
-    await user.save();
-
-    const verificationUrl = `${getBackendUrl()}/api/auth/verify-email?token=${verificationToken}`;
     try {
-      await sendVerificationEmail(user.email, verificationUrl);
+      await sendOTPEmail(normalizedEmail, otp);
     } catch (sendError) {
-      await User.deleteOne({ _id: user._id });
+      await OtpVerification.deleteMany({ email: normalizedEmail });
       throw sendError;
     }
 
-    return success(res, null, 'Verification email sent', 201);
+    return success(res, null, 'OTP sent to email', 201);
   } catch (requestError) {
     console.error('Register error:', requestError);
     const isProduction = process.env.NODE_ENV === 'production';
@@ -75,28 +75,48 @@ exports.register = async (req, res) => {
   }
 };
 
-exports.verifyEmail = async (req, res) => {
+exports.verifyOtp = async (req, res) => {
   try {
-    const { token } = req.query;
+    const { email, otp } = req.body;
 
-    if (!token) {
-      return error(res, 'Verification token is required', 400);
+    if (!email || !otp) {
+      return error(res, 'Email and OTP are required', 400);
     }
 
-    const user = await User.findOne({ verificationToken: String(token) });
-    if (!user) {
-      return error(res, 'Invalid or expired verification token', 400);
+    const normalizedEmail = String(email).toLowerCase();
+    const otpRecord = await OtpVerification.findOne({ email: normalizedEmail });
+    if (!otpRecord) {
+      return error(res, 'Invalid or expired OTP', 400);
     }
 
-    user.isVerified = true;
-    user.emailVerified = true;
-    user.verificationToken = null;
+    if (new Date(otpRecord.expiresAt).getTime() < Date.now()) {
+      await OtpVerification.deleteOne({ _id: otpRecord._id });
+      return error(res, 'OTP has expired', 400);
+    }
+
+    if (String(otpRecord.otp) !== String(otp)) {
+      return error(res, 'Invalid OTP', 400);
+    }
+
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser) {
+      await OtpVerification.deleteOne({ _id: otpRecord._id });
+      return error(res, 'Email already registered', 409);
+    }
+
+    const user = new User({
+      ...otpRecord.signupData,
+      isVerified: true,
+      emailVerified: true
+    });
+    user.$locals = { passwordHashed: true };
     await user.save();
+    await OtpVerification.deleteOne({ _id: otpRecord._id });
 
     return success(res, null, 'Email verified successfully');
   } catch (requestError) {
     const isProduction = process.env.NODE_ENV === 'production';
-    return error(res, isProduction ? 'Email verification failed' : requestError.message, 500);
+    return error(res, isProduction ? 'OTP verification failed' : requestError.message, 500);
   }
 };
 

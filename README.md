@@ -61,7 +61,6 @@ Required values:
 - `JWT_SECRET`
 - `SENDGRID_API_KEY`
 - `EMAIL_FROM`
-- `BACKEND_URL`
 
 ### Frontend
 Create `.env.local` from template:
@@ -104,7 +103,6 @@ Steps:
 4. Add the following to `backend/.env`:
    - `SENDGRID_API_KEY=<your_sendgrid_api_key>`
    - `EMAIL_FROM=noreply@yourdomain.com`
-   - `BACKEND_URL=https://your-backend-domain.com`
 
 ## Docker Setup
 Run full stack:
