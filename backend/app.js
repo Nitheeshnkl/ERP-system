@@ -28,12 +28,16 @@ let server;
 let isShuttingDown = false;
 
 const rawOrigins = process.env.CORS_ALLOWED_ORIGINS || '';
+const defaultOrigins = ['https://erp-system-five-blush.vercel.app'];
 const allowedOrigins = rawOrigins === '*'
   ? '*'
-  : rawOrigins
-    .split(',')
-    .map((o) => o.trim())
-    .filter(Boolean);
+  : Array.from(new Set([
+      ...defaultOrigins,
+      ...rawOrigins
+        .split(',')
+        .map((o) => o.trim())
+        .filter(Boolean),
+    ]));
 
 console.log('Allowed CORS origins:', allowedOrigins);
 
@@ -92,7 +96,10 @@ app.use(
       // Block everything else
       return callback(new Error(`CORS blocked: ${origin}`), false);
     },
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 200,
   })
 );
 app.use(cookieParser());
@@ -119,6 +126,13 @@ app.get('/ready', (_req, res) => {
     status: 'ready',
     db: 'connected',
   }, 'Readiness check completed');
+});
+
+app.get('/api', (_req, res) => {
+  return success(res, {
+    status: 'ok',
+    service: 'erp-api',
+  }, 'ERP API running');
 });
 
 app.get('/test-email', async (_req, res) => {
