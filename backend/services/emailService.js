@@ -3,6 +3,10 @@ const nodemailer = require('nodemailer');
 const getEmailUser = () => (process.env.EMAIL_USER || '').trim();
 const getEmailPass = () => (process.env.EMAIL_PASS || '').trim();
 const getEmailFrom = () => (process.env.EMAIL_FROM || '').trim();
+const getSmtpTimeoutMs = () => {
+  const raw = Number(process.env.SMTP_TIMEOUT_MS);
+  return Number.isFinite(raw) && raw > 0 ? raw : 8000;
+};
 
 let cachedTransporter = null;
 const getTransporter = () => {
@@ -18,6 +22,9 @@ const getTransporter = () => {
   cachedTransporter = nodemailer.createTransport({
     service: 'gmail',
     auth: { user, pass },
+    connectionTimeout: getSmtpTimeoutMs(),
+    greetingTimeout: getSmtpTimeoutMs(),
+    socketTimeout: getSmtpTimeoutMs(),
   });
 
   return cachedTransporter;
@@ -38,7 +45,7 @@ const sendOTPEmail = async (email, otp) => {
 
     console.log('Attempting to send OTP to:', email);
 
-    await transporter.sendMail({
+    const mailOptions = {
       from,
       to: email,
       subject: 'Email Verification OTP - ERP System',
@@ -69,6 +76,21 @@ const sendOTPEmail = async (email, otp) => {
           </p>
         </div>
       `,
+    };
+
+    const timeoutMs = getSmtpTimeoutMs();
+    const sendPromise = transporter.sendMail(mailOptions);
+    let timeoutId;
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error(`SMTP timeout after ${timeoutMs}ms`));
+      }, timeoutMs);
+    });
+
+    await Promise.race([sendPromise, timeoutPromise]).finally(() => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     });
 
     console.log('SMTP send OK');

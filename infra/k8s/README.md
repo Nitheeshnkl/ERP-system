@@ -1,5 +1,5 @@
-# Kubernetes Placeholder
+# Kubernetes
 
-This folder is intentionally a placeholder for future production Kubernetes manifests.
+This directory is reserved for future Kubernetes manifests. No production-ready k8s configuration is included yet.
 
-No live production Kubernetes manifests are included in this deployment setup.
+If Kubernetes deployment is planned, add manifests here and reference them from `README_DEPLOY.md`.

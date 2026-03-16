@@ -4,8 +4,7 @@ Database: MongoDB (`erp` by default)
 
 ## Collections
 
-## `users`
-Fields:
+**users**
 - `name` (String, required)
 - `email` (String, required, unique)
 - `password` (String, required, bcrypt-hashed)
@@ -13,35 +12,32 @@ Fields:
 - `tokenVersion` (Number, default `0`)
 - `createdAt`, `updatedAt`
 
-Indexes:
+Indexes
 - Unique index on `email`
 
-## `products`
-Fields:
+**products**
 - `name` (String, required)
 - `sku` (String, required, unique)
 - `price` (Number, min `0`)
 - `stockQuantity` (Number, min `0`, default `0`)
 - `createdAt`, `updatedAt`
 
-Indexes:
+Indexes
 - Unique index on `sku`
 - Secondary index on `name`
 
-## `customers`
-Fields:
+**customers**
 - `name` (String, required)
 - `email` (String, required, unique)
 - `phone` (String)
 - `address` (String)
 - `createdAt`, `updatedAt`
 
-Indexes:
+Indexes
 - Unique index on `email`
 - Secondary index on `name`
 
-## `suppliers`
-Fields:
+**suppliers**
 - `name` (String, required)
 - `email` (String, normalized to lowercase, optional)
 - `phone` (String)
@@ -49,63 +45,46 @@ Fields:
 - `city`, `state`, `country`, `postalCode` (String)
 - `createdAt`, `updatedAt`
 
-Indexes:
+Indexes
 - Secondary index on `name`
-- Partial unique index on `email` (only when email is present as string)
+- Partial unique index on `email` when present
 
-## `salesorders`
-Fields:
+**salesorders**
 - `customerId` (ObjectId -> `customers`, required)
 - `legacy_customerId` (String, nullable)
 - `customerName` (String)
-- `items[]`
-  - `productId` (ObjectId -> `products`, required)
-  - `legacy_productId` (String, nullable)
-  - `productName` (String)
-  - `quantity` (Number, min `1`)
-  - `unitPrice` (Number, min `0`)
+- `items[]` with `productId`, `legacy_productId`, `productName`, `quantity`, `unitPrice`
 - `totalAmount` (Number, min `0`)
 - `status` (Enum: `Pending`, `Processing`, `Completed`, `Cancelled`)
 - `createdAt`, `updatedAt`
 
-Indexes:
+Indexes
 - `customerName`
 - `status`
 
-## `purchaseorders`
-Fields:
+**purchaseorders**
 - `supplierId` (ObjectId -> `suppliers`, required)
 - `legacy_supplierId` (String, nullable)
 - `supplierName` (String)
-- `items[]`
-  - `productId` (ObjectId -> `products`, required)
-  - `legacy_productId` (String, nullable)
-  - `productName` (String)
-  - `quantity` (Number, min `1`)
-  - `unitPrice` (Number, min `0`)
+- `items[]` with `productId`, `legacy_productId`, `productName`, `quantity`, `unitPrice`
 - `totalAmount` (Number, min `0`)
 - `status` (Enum: `Pending`, `Received`, `Cancelled`)
 - `createdAt`, `updatedAt`
 
-Indexes:
+Indexes
 - `supplierName`
 - `status`
 
-## `grns`
-Fields:
+**grns**
 - `purchaseOrderId` (ObjectId -> `purchaseorders`, required)
 - `legacy_purchaseOrderId` (String, nullable)
-- `items[]`
-  - `productId` (ObjectId -> `products`, required)
-  - `legacy_productId` (String, nullable)
-  - `receivedQuantity` (Number, min `1`)
+- `items[]` with `productId`, `legacy_productId`, `receivedQuantity`
 - `createdAt`, `updatedAt`
 
-Indexes:
+Indexes
 - Default `_id`
 
-## `invoices`
-Fields:
+**invoices**
 - `salesOrderId` (ObjectId -> `salesorders`, required, unique)
 - `legacy_salesOrderId` (String, nullable)
 - `amount` (Number, required)
@@ -113,12 +92,11 @@ Fields:
 - `paymentStatus` (Enum: `Paid`, `Pending`, `Cancelled`)
 - `createdAt`, `updatedAt`
 
-Indexes:
+Indexes
 - Unique index on `salesOrderId`
 - Secondary index on `paymentStatus`
 
-## `demometadatas`
-Fields:
+**demometadatas**
 - `type` (String, unique, default `demo_credentials`)
 - `role` (String, required)
 - `email` (String, required)
@@ -126,7 +104,7 @@ Fields:
 - `note` (String)
 - `createdAt`, `updatedAt`
 
-Indexes:
+Indexes
 - Unique index on `type`
 
 ## Relationships Summary
@@ -139,5 +117,4 @@ Indexes:
 - `Invoice.salesOrderId` -> `SalesOrder._id` (1:1 enforced by unique index)
 
 ## Notes
-- `legacy_*` fields are maintained to preserve compatibility with legacy string identifiers.
-- No schema changes were made as part of this documentation update.
+- `legacy_*` fields are retained for backward compatibility with legacy identifiers.

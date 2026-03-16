@@ -61,14 +61,20 @@ exports.register = async (req, res) => {
       expiresAt: new Date(Date.now() + 5 * 60 * 1000)
     });
 
-    const emailSent = await sendOTPEmail(normalizedEmail, otp);
-    console.log('OTP email send status:', { email: normalizedEmail, sent: emailSent });
-    if (!emailSent) {
-      await OtpVerification.deleteMany({ email: normalizedEmail });
-      return error(res, 'Failed to send OTP email', 500);
-    }
+    // Respond immediately so the frontend can open the OTP popup without waiting on SMTP.
+    const response = success(res, null, 'OTP sent successfully', 201);
 
-    return success(res, null, 'OTP sent successfully', 201);
+    // Fire-and-forget OTP email to avoid blocking the API response.
+    setImmediate(async () => {
+      try {
+        const emailSent = await sendOTPEmail(normalizedEmail, otp);
+        console.log('OTP email send status:', { email: normalizedEmail, sent: emailSent });
+      } catch (sendError) {
+        console.error('OTP email send error:', sendError);
+      }
+    });
+
+    return response;
   } catch (requestError) {
     console.error('Register error:', requestError);
     const isProduction = process.env.NODE_ENV === 'production';

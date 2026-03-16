@@ -28,7 +28,10 @@ let server;
 let isShuttingDown = false;
 
 const rawOrigins = process.env.CORS_ALLOWED_ORIGINS || '';
-const defaultOrigins = ['https://erp-system-five-blush.vercel.app'];
+const defaultOrigins = [
+  'http://localhost:5173',
+  'https://erp-system-five-blush.vercel.app',
+];
 const allowedOrigins = rawOrigins === '*'
   ? '*'
   : Array.from(new Set([
@@ -160,7 +163,7 @@ app.use('/api/reports', reportRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-const PORT = Number(process.env.PORT) || 8000;
+const PORT = Number(process.env.PORT) || 5001;
 const startServer = async () => {
   try {
     validateEnv();

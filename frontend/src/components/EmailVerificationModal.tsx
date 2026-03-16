@@ -31,8 +31,8 @@ export default function EmailVerificationModal({
   if (!open) return null
 
   return (
-    <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="email-verify-title">
-      <div className="modal">
+    <div className="otp-overlay" role="dialog" aria-modal="true" aria-labelledby="email-verify-title">
+      <div className="otp-modal">
         <Typography id="email-verify-title" variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
           Verify Your Email
         </Typography>

@@ -1,21 +1,19 @@
 # Monitoring Recommendations
 
-## Render
-- Configure health check endpoint to `/health`.
-- Enable service alerts for deployment failures and downtime.
-- Track response latency and restart frequency.
+## Backend
+- Use the `/health` endpoint for uptime checks.
+- Track response latency and error rates.
+- Alert on repeated restarts or failed deploys.
 
-## Vercel
-- Enable Vercel Analytics and Web Vitals monitoring.
-- Add uptime checks against frontend public URL.
-- Monitor client-side API error rates in browser logs.
+## Frontend
+- Enable Web Vitals monitoring in Vercel.
+- Add basic uptime checks on the public URL.
+- Track client-side API error rates.
 
-## Application errors (Sentry)
-- Add backend SDK using `SENTRY_DSN` env var (optional).
-- Add frontend SDK in Vite app with release tagging.
-- Configure alert routing (email/Slack/PagerDuty) for high-severity issues.
+## Error Tracking
+- Add Sentry (optional) to capture backend and frontend exceptions.
+- Route alerts to email or chat for high-severity issues.
 
-## Baseline operational checks
-- Run `infra/scripts/prod-healthcheck.sh` after each deploy.
-- Maintain simple smoke test checklist for login + core pages.
-- Store incident runbook and rollback commands in your team docs.
+## Operational Routine
+- Run `infra/scripts/prod-healthcheck.sh` after each deployment.
+- Maintain a short smoke-test checklist for core flows.
