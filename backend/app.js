@@ -55,11 +55,11 @@ const validateEnv = () => {
 
   const emailOtpEnabled = String(process.env.ENABLE_EMAIL_OTP || 'true').toLowerCase() !== 'false';
   if (emailOtpEnabled) {
-    if (!(process.env.SENDGRID_API_KEY || '').trim()) {
-      missing.push('SENDGRID_API_KEY');
+    if (!(process.env.EMAIL_USER || '').trim()) {
+      missing.push('EMAIL_USER');
     }
-    if (!(process.env.EMAIL_FROM || '').trim()) {
-      missing.push('EMAIL_FROM');
+    if (!(process.env.EMAIL_PASS || '').trim()) {
+      missing.push('EMAIL_PASS');
     }
   } else {
     console.warn('Email OTP is disabled via ENABLE_EMAIL_OTP=false');

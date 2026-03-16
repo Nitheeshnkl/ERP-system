@@ -1,47 +1,55 @@
-const sgMail = require('@sendgrid/mail');
+const nodemailer = require('nodemailer');
 
-const getSendgridApiKey = () => (process.env.SENDGRID_API_KEY || '').trim();
+const getEmailUser = () => (process.env.EMAIL_USER || '').trim();
+const getEmailPass = () => (process.env.EMAIL_PASS || '').trim();
 const getEmailFrom = () => (process.env.EMAIL_FROM || '').trim();
 
-let sendgridInitialized = false;
-const ensureSendgridInitialized = () => {
-  if (sendgridInitialized) return true;
-  const apiKey = getSendgridApiKey();
-  if (!apiKey) {
-    console.error('SendGrid error: Missing SENDGRID_API_KEY');
-    return false;
+let cachedTransporter = null;
+const getTransporter = () => {
+  if (cachedTransporter) return cachedTransporter;
+
+  const user = getEmailUser();
+  const pass = getEmailPass();
+  if (!user || !pass) {
+    console.error('SMTP error: Missing EMAIL_USER or EMAIL_PASS');
+    return null;
   }
-  sgMail.setApiKey(apiKey);
-  sendgridInitialized = true;
-  return true;
+
+  cachedTransporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: { user, pass },
+  });
+
+  return cachedTransporter;
 };
 
 const sendOTPEmail = async (email, otp) => {
   try {
-    const initialized = ensureSendgridInitialized();
-    if (!initialized) {
+    const transporter = getTransporter();
+    if (!transporter) {
       return false;
     }
 
-    const from = getEmailFrom();
+    const from = getEmailFrom() || getEmailUser();
     if (!from) {
-      console.error('SendGrid error: Missing EMAIL_FROM');
+      console.error('SMTP error: Missing EMAIL_FROM/EMAIL_USER');
       return false;
     }
 
     console.log('Attempting to send OTP to:', email);
 
-    const msg = {
-      to: email,
+    await transporter.sendMail({
       from,
-      subject: 'Verify Your Email - ERP System',
-      text: `Hello, your OTP is ${otp}. It will expire in 5 minutes. If you did not request this, you can ignore this email.`,
+      to: email,
+      subject: 'Email Verification OTP - ERP System',
+      text: `Your OTP is ${otp}. It will expire in 5 minutes.`,
       html: `
         <div style="font-family: Arial, sans-serif; padding:20px;">
           <h2 style="color:#2563eb;">ERP System Email Verification</h2>
           <p>Hello,</p>
-          <p>Welcome to ERP System!</p>
-          <p>Please verify your email address using the One-Time Password (OTP) below:</p>
+          <p>Your OTP code is:</p>
           <div style="
             font-size:28px;
             font-weight:bold;
@@ -62,14 +70,13 @@ const sendOTPEmail = async (email, otp) => {
             ERP System Team
           </p>
         </div>
-      `
-    };
+      `,
+    });
 
-    const response = await sgMail.send(msg);
-    console.log('SendGrid response status:', response?.[0]?.statusCode);
+    console.log('SMTP send OK');
     return true;
   } catch (sendError) {
-    console.error('SendGrid error:', sendError.response?.body || sendError.message);
+    console.error('SMTP error:', sendError?.message || sendError);
     return false;
   }
 };
