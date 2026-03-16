@@ -34,7 +34,7 @@ export default function EmailVerificationModal({
     <div className="otp-overlay" role="dialog" aria-modal="true" aria-labelledby="email-verify-title">
       <div className="otp-modal">
         <Typography id="email-verify-title" variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
-          Verify Your Email
+          Email Verification
         </Typography>
         <Typography variant="body2" sx={{ mb: 2, color: '#757575' }}>
           An OTP has been sent to your email. Enter it below to activate your account.
@@ -78,7 +78,7 @@ export default function EmailVerificationModal({
             Resend OTP
           </Button>
           <Button type="button" variant="text" fullWidth onClick={onClose} disabled={loading}>
-            Close
+            Cancel
           </Button>
         </Box>
       </div>

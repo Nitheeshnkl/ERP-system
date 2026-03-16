@@ -5,7 +5,7 @@ const getEmailPass = () => (process.env.EMAIL_PASS || '').trim();
 const getEmailFrom = () => (process.env.EMAIL_FROM || '').trim();
 const getSmtpTimeoutMs = () => {
   const raw = Number(process.env.SMTP_TIMEOUT_MS);
-  return Number.isFinite(raw) && raw > 0 ? raw : 8000;
+  return Number.isFinite(raw) && raw > 0 ? raw : 20000;
 };
 
 let cachedTransporter = null;
@@ -43,37 +43,25 @@ const sendOTPEmail = async (email, otp) => {
       return false;
     }
 
-    console.log('Attempting to send OTP to:', email);
+    console.log('[MAIL] sending OTP', { email });
 
     const mailOptions = {
       from,
       to: email,
-      subject: 'Email Verification OTP - ERP System',
-      text: `Your OTP is ${otp}. It will expire in 5 minutes.`,
+      subject: 'ERP System Verification Code',
+      text: [
+        `Your ERP System verification code is ${otp}.`,
+        '',
+        'This code will expire in 5 minutes.',
+        'If you did not request this code please ignore this email.',
+      ].join('\n'),
       html: `
-        <div style="font-family: Arial, sans-serif; padding:20px;">
-          <h2 style="color:#2563eb;">ERP System Email Verification</h2>
-          <p>Hello,</p>
-          <p>Your OTP code is:</p>
-          <div style="
-            font-size:28px;
-            font-weight:bold;
-            letter-spacing:6px;
-            margin:20px 0;
-            color:#111827;
-          ">
-            ${otp}
-          </div>
-          <p>This OTP will expire in <strong>5 minutes</strong>.</p>
-          <p>If you did not create this account, please ignore this email.</p>
-          <hr style="margin:20px 0"/>
-          <p style="font-size:12px;color:#6b7280;">
-            If the email appears in your spam folder, please mark it as
-            "Not Spam" so future emails arrive in your inbox.
-          </p>
-          <p style="font-size:12px;color:#6b7280;">
-            ERP System Team
-          </p>
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2 style="margin: 0 0 12px;">ERP System Verification</h2>
+          <p>Your OTP code:</p>
+          <h1 style="letter-spacing: 6px; margin: 12px 0;">${otp}</h1>
+          <p>This code expires in 5 minutes.</p>
+          <p>If you did not request this code please ignore this email.</p>
         </div>
       `,
     };
@@ -93,10 +81,10 @@ const sendOTPEmail = async (email, otp) => {
       }
     });
 
-    console.log('SMTP send OK');
+    console.log('[MAIL] success');
     return true;
   } catch (sendError) {
-    console.error('SMTP error:', sendError?.message || sendError);
+    console.error('[MAIL] error', sendError?.message || sendError);
     return false;
   }
 };

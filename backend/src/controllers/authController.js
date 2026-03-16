@@ -45,7 +45,7 @@ exports.register = async (req, res) => {
       upperCaseAlphabets: false,
       specialChars: false
     });
-    console.log('Generated OTP for signup:', { email: normalizedEmail, otp });
+    console.log('[AUTH] OTP generated', { email: normalizedEmail, otp });
     const passwordHash = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 10);
 
     await OtpVerification.deleteMany({ email: normalizedEmail });
@@ -62,29 +62,68 @@ exports.register = async (req, res) => {
     });
 
     // Respond immediately so the frontend can open the OTP popup without waiting on SMTP.
-    const response = success(res, null, 'OTP sent successfully', 201);
+    const response = success(res, { email: normalizedEmail }, 'Signup successful. Email verification required.', 201);
 
     // Fire-and-forget OTP email to avoid blocking the API response.
     setImmediate(async () => {
       try {
         const emailSent = await sendOTPEmail(normalizedEmail, otp);
-        console.log('OTP email send status:', { email: normalizedEmail, sent: emailSent });
+        console.log('[MAIL] success', { email: normalizedEmail, sent: emailSent });
       } catch (sendError) {
-        console.error('OTP email send error:', sendError);
+        console.error('[MAIL] error', sendError);
       }
     });
 
     return response;
   } catch (requestError) {
-    console.error('Register error:', requestError);
+    console.error('[AUTH] register error', requestError);
     const isProduction = process.env.NODE_ENV === 'production';
     return error(res, isProduction ? 'Registration failed' : requestError.message, 500);
+  }
+};
+
+exports.resendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || !String(email).trim()) {
+      return error(res, 'Email is required', 400);
+    }
+
+    const normalizedEmail = String(email).toLowerCase().trim();
+    const existingOtp = await OtpVerification.findOne({ email: normalizedEmail });
+    if (!existingOtp) {
+      return error(res, 'No pending OTP for this email', 404);
+    }
+
+    const otp = otpGenerator.generate(6, {
+      digits: true,
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false
+    });
+    console.log('[AUTH] resend OTP', { email: normalizedEmail, otp });
+
+    existingOtp.otp = otp;
+    existingOtp.expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    await existingOtp.save();
+
+    const emailSent = await sendOTPEmail(normalizedEmail, otp);
+    if (!emailSent) {
+      return error(res, 'Failed to send OTP email', 500);
+    }
+
+    return success(res, { email: normalizedEmail }, 'OTP resent');
+  } catch (requestError) {
+    console.error('[AUTH] resend OTP error', requestError);
+    const isProduction = process.env.NODE_ENV === 'production';
+    return error(res, isProduction ? 'Failed to resend OTP' : requestError.message, 500);
   }
 };
 
 exports.verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
+    console.log('[AUTH] verifying OTP', { email });
 
     if (!email || !otp) {
       return error(res, 'Email and OTP are required', 400);

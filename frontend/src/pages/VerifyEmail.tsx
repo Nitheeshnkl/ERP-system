@@ -44,13 +44,35 @@ export default function VerifyEmail() {
 
     try {
       setLoading(true)
-      await axiosInstance.post('/auth/verify-email', { email: email.trim(), otp: otp.trim() })
+      await axiosInstance.post('/auth/verify-otp', { email: email.trim(), otp: otp.trim() })
       setSuccess('Email verified successfully')
+      setShowVerifyModal(false)
       window.setTimeout(() => {
-        navigate('/login', { replace: true })
+        navigate('/dashboard', { replace: true })
       }, 700)
     } catch (requestError: any) {
       setError(requestError.response?.data?.message || 'Verification failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResend = async () => {
+    setError('')
+    setSuccess('')
+
+    if (!email.trim()) {
+      setError('Email is required')
+      return
+    }
+
+    try {
+      setLoading(true)
+      const response: any = await axiosInstance.post('/auth/resend-otp', { email: email.trim() })
+      setSuccess(response?.message || 'OTP resent')
+      setShowVerifyModal(true)
+    } catch (requestError: any) {
+      setError(requestError.response?.data?.message || 'Failed to resend OTP')
     } finally {
       setLoading(false)
     }
@@ -69,10 +91,7 @@ export default function VerifyEmail() {
       <EmailVerificationModal
         open={showVerifyModal}
         onClose={() => setShowVerifyModal(false)}
-        onResend={() => {
-          setShowVerifyModal(false)
-          navigate('/login', { state: { openSignup: true, prefillEmail: email } })
-        }}
+        onResend={handleResend}
         email={email}
         otp={otp}
         loading={loading}
