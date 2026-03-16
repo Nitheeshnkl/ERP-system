@@ -96,6 +96,7 @@ export default function Auth() {
   const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setValidationError('')
+    console.log('[Signup] Submit clicked')
 
     if (!signUpName.trim() || !signUpEmail.trim() || !signUpPassword.trim()) {
       setValidationError('Name, email, and password are required')
@@ -103,6 +104,7 @@ export default function Auth() {
     }
 
     const result = await dispatch(register({ name: signUpName, email: signUpEmail, password: signUpPassword, role: signUpRole }))
+    console.log('[Signup] Response:', result)
 
     if (register.fulfilled.match(result)) {
       setValidationError('')
@@ -111,6 +113,7 @@ export default function Auth() {
       setSignUpEmail('')
       setSignUpPassword('')
       setSignUpRole('Inventory')
+      console.log('[Signup] Opening OTP modal')
       navigate('/verify-email', { state: { email: registeredEmail, showVerifyModal: true } })
     }
   }

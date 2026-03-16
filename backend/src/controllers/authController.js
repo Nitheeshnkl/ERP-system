@@ -45,6 +45,7 @@ exports.register = async (req, res) => {
       upperCaseAlphabets: false,
       specialChars: false
     });
+    console.log('Generated OTP for signup:', { email: normalizedEmail, otp });
     const passwordHash = await bcrypt.hash(password, Number(process.env.BCRYPT_ROUNDS) || 10);
 
     await OtpVerification.deleteMany({ email: normalizedEmail });
@@ -61,6 +62,7 @@ exports.register = async (req, res) => {
     });
 
     const emailSent = await sendOTPEmail(normalizedEmail, otp);
+    console.log('OTP email send status:', { email: normalizedEmail, sent: emailSent });
     if (!emailSent) {
       await OtpVerification.deleteMany({ email: normalizedEmail });
       return error(res, 'Failed to send OTP email', 500);
