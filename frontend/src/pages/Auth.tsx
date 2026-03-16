@@ -105,14 +105,13 @@ export default function Auth() {
     const result = await dispatch(register({ name: signUpName, email: signUpEmail, password: signUpPassword, role: signUpRole }))
 
     if (register.fulfilled.match(result)) {
-      const response = result.payload as { success?: boolean } | undefined
       setValidationError('')
       setSignUpName('')
       const registeredEmail = signUpEmail.trim()
       setSignUpEmail('')
       setSignUpPassword('')
       setSignUpRole('Inventory')
-      navigate('/verify-email', { state: { email: registeredEmail, showVerifyModal: response?.success === true } })
+      navigate('/verify-email', { state: { email: registeredEmail, showVerifyModal: true } })
     }
   }
 

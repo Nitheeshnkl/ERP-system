@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Box,
@@ -25,6 +25,12 @@ export default function VerifyEmail() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [showVerifyModal, setShowVerifyModal] = useState(showVerifyModalFromState)
+
+  useEffect(() => {
+    if (showVerifyModalFromState) {
+      setShowVerifyModal(true)
+    }
+  }, [showVerifyModalFromState])
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -67,6 +73,14 @@ export default function VerifyEmail() {
           setShowVerifyModal(false)
           navigate('/login', { state: { openSignup: true, prefillEmail: email } })
         }}
+        email={email}
+        otp={otp}
+        loading={loading}
+        error={error}
+        success={success}
+        onEmailChange={setEmail}
+        onOtpChange={setOtp}
+        onSubmit={handleSubmit}
       />
       <Container maxWidth="sm">
         <Paper elevation={3} sx={{ p: 4 }}>
@@ -83,35 +97,37 @@ export default function VerifyEmail() {
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Email"
-              type="email"
-              margin="normal"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-            />
-            <TextField
-              fullWidth
-              label="OTP"
-              margin="normal"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              disabled={loading}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              sx={{ mt: 3 }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} /> : 'Verify'}
-            </Button>
-          </Box>
+          {!showVerifyModal && (
+            <Box component="form" onSubmit={handleSubmit}>
+              <TextField
+                fullWidth
+                label="Email"
+                type="email"
+                margin="normal"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+              />
+              <TextField
+                fullWidth
+                label="OTP"
+                margin="normal"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                disabled={loading}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                sx={{ mt: 3 }}
+                disabled={loading}
+              >
+                {loading ? <CircularProgress size={24} /> : 'Verify'}
+              </Button>
+            </Box>
+          )}
         </Paper>
       </Container>
     </Box>
