@@ -28,20 +28,17 @@ let server;
 let isShuttingDown = false;
 
 const rawOrigins = process.env.CORS_ALLOWED_ORIGINS || '';
-const defaultOrigins = [
+const allowedOrigins = [
   'http://localhost:5173',
   'https://erp-system-five-blush.vercel.app',
 ];
-const allowedOrigins = rawOrigins === '*'
-  ? '*'
-  : Array.from(new Set([
-      ...defaultOrigins,
-      ...rawOrigins
-        .split(',')
-        .map((o) => o.trim())
-        .filter(Boolean),
-    ]));
-
+if (rawOrigins) {
+  const extraOrigins = rawOrigins
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  allowedOrigins.push(...extraOrigins);
+}
 console.log('Allowed CORS origins:', allowedOrigins);
 
 const validateEnv = () => {
@@ -62,19 +59,21 @@ const validateEnv = () => {
 
   const emailOtpEnabled = String(process.env.ENABLE_EMAIL_OTP || 'true').toLowerCase() !== 'false';
   if (emailOtpEnabled) {
-    if (!(process.env.EMAIL_USER || '').trim()) {
-      missing.push('EMAIL_USER');
+    if (!(process.env.BREVO_API_KEY || '').trim()) {
+      missing.push('BREVO_API_KEY');
     }
-    if (!(process.env.EMAIL_PASS || '').trim()) {
-      missing.push('EMAIL_PASS');
+    if (!(process.env.BREVO_SENDER_EMAIL || '').trim()) {
+      missing.push('BREVO_SENDER_EMAIL');
     }
   } else {
     console.warn('Email OTP is disabled via ENABLE_EMAIL_OTP=false');
   }
 
   if (missing.length > 0) {
-    throw new Error(`Missing required environment variable(s): ${missing.join(', ')}`);
+    console.error(`Missing required environment variable(s): ${missing.join(', ')}`);
+    return false;
   }
+  return true;
 };
 
 // Middleware
@@ -82,27 +81,8 @@ app.use(helmet());
 app.use(express.json());
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow non-browser requests (Postman, server-to-server)
-      if (!origin) return callback(null, true);
-
-      // Allow all (only if explicitly set)
-      if (allowedOrigins === '*') {
-        return callback(null, true);
-      }
-
-      // Allow listed origins
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      // Block everything else
-      return callback(new Error(`CORS blocked: ${origin}`), false);
-    },
+    origin: allowedOrigins,
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    optionsSuccessStatus: 200,
   })
 );
 app.use(cookieParser());
@@ -163,10 +143,13 @@ app.use('/api/reports', reportRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-const PORT = Number(process.env.PORT) || 5001;
+const PORT = process.env.PORT || 5001;
 const startServer = async () => {
   try {
-    validateEnv();
+    const envOk = validateEnv();
+    if (!envOk) {
+      console.warn('Continuing startup with missing environment variables. Some features may fail.');
+    }
     await connectDB();
     await createSuperAdmin();
 

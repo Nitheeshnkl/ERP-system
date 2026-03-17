@@ -8,8 +8,8 @@
 ## Backend Configuration
 - [ ] `MONGO_URI` or `MONGODB_URI` set
 - [ ] `JWT_SECRET` set
-- [ ] `EMAIL_USER` and `EMAIL_PASS` set (Gmail SMTP)
-- [ ] `EMAIL_FROM` set if different from `EMAIL_USER`
+- [ ] `BREVO_API_KEY` set
+- [ ] `BREVO_SENDER_EMAIL` set
 - [ ] `NODE_ENV=production` set
 - [ ] `ENABLE_EMAIL_OTP=true` unless intentionally disabled
 - [ ] `CORS_ALLOWED_ORIGINS` includes frontend domain

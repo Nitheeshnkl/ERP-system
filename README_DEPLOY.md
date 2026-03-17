@@ -15,7 +15,7 @@ This guide covers a typical setup with Render (backend), Vercel (frontend), and 
 3. Build command: `npm ci`
 4. Start command: `npm start`
 5. Add environment variables:
-`MONGO_URI`, `JWT_SECRET`, `EMAIL_USER`, `EMAIL_PASS`, `EMAIL_FROM` (optional), `NODE_ENV=production`
+`MONGO_URI`, `JWT_SECRET`, `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `NODE_ENV=production`
 6. Set health check path to `/health`.
 
 Notes

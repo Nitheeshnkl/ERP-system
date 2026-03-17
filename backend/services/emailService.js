@@ -1,90 +1,68 @@
-const nodemailer = require('nodemailer');
+const SibApiV3Sdk = require('sib-api-v3-sdk');
 
-const getEmailUser = () => (process.env.EMAIL_USER || '').trim();
-const getEmailPass = () => (process.env.EMAIL_PASS || '').trim();
-const getEmailFrom = () => (process.env.EMAIL_FROM || '').trim();
-const getSmtpTimeoutMs = () => {
-  const raw = Number(process.env.SMTP_TIMEOUT_MS);
-  return Number.isFinite(raw) && raw > 0 ? raw : 20000;
-};
+const getBrevoApiKey = () => (process.env.BREVO_API_KEY || '').trim();
+const getBrevoSenderEmail = () => (process.env.BREVO_SENDER_EMAIL || '').trim();
+const getBrevoSenderName = () => (process.env.BREVO_SENDER_NAME || '').trim();
 
-let cachedTransporter = null;
-const getTransporter = () => {
-  if (cachedTransporter) return cachedTransporter;
+let cachedApiInstance = null;
+const getBrevoApi = () => {
+  if (cachedApiInstance) return cachedApiInstance;
 
-  const user = getEmailUser();
-  const pass = getEmailPass();
-  if (!user || !pass) {
-    console.error('SMTP error: Missing EMAIL_USER or EMAIL_PASS');
+  const apiKey = getBrevoApiKey();
+  if (!apiKey) {
+    console.error('BREVO error: Missing BREVO_API_KEY');
     return null;
   }
 
-  cachedTransporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user, pass },
-    connectionTimeout: getSmtpTimeoutMs(),
-    greetingTimeout: getSmtpTimeoutMs(),
-    socketTimeout: getSmtpTimeoutMs(),
-  });
+  const defaultClient = SibApiV3Sdk.ApiClient.instance;
+  const apiKeyAuth = defaultClient.authentications['api-key'];
+  apiKeyAuth.apiKey = apiKey;
+  cachedApiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
-  return cachedTransporter;
+  return cachedApiInstance;
 };
 
 const sendOTPEmail = async (email, otp) => {
   try {
-    const transporter = getTransporter();
-    if (!transporter) {
+    const apiInstance = getBrevoApi();
+    if (!apiInstance) {
       return false;
     }
 
-    const from = getEmailFrom() || getEmailUser();
-    if (!from) {
-      console.error('SMTP error: Missing EMAIL_FROM/EMAIL_USER');
-      return false;
+    const fromEmail = getBrevoSenderEmail();
+    const fromName = getBrevoSenderName();
+    if (!fromEmail || !fromName) {
+      throw new Error('Missing BREVO_SENDER_EMAIL or BREVO_SENDER_NAME');
     }
 
     console.log('[MAIL] sending OTP', { email });
 
-    const mailOptions = {
-      from,
-      to: email,
-      subject: 'ERP System Verification Code',
-      text: [
-        `Your ERP System verification code is ${otp}.`,
-        '',
-        'This code will expire in 5 minutes.',
-        'If you did not request this code please ignore this email.',
-      ].join('\n'),
-      html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2 style="margin: 0 0 12px;">ERP System Verification</h2>
-          <p>Your OTP code:</p>
-          <h1 style="letter-spacing: 6px; margin: 12px 0;">${otp}</h1>
-          <p>This code expires in 5 minutes.</p>
-          <p>If you did not request this code please ignore this email.</p>
-        </div>
-      `,
-    };
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    sendSmtpEmail.sender = { email: fromEmail, name: fromName };
+    sendSmtpEmail.to = [{ email }];
+    sendSmtpEmail.subject = 'Verify your email';
+    sendSmtpEmail.textContent = [
+      `Your verification code is ${otp}.`,
+      '',
+      'This code will expire in 5 minutes.',
+      'If you did not request this code please ignore this email.',
+    ].join('\n');
+    sendSmtpEmail.htmlContent = `
+      <div style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2 style="margin: 0 0 12px;">Verify your email</h2>
+        <p>Your OTP code:</p>
+        <h1 style="letter-spacing: 6px; margin: 12px 0;">${otp}</h1>
+        <p>This code expires in 5 minutes.</p>
+        <p>If you did not request this code please ignore this email.</p>
+      </div>
+    `;
+    const response = await apiInstance.sendTransacEmail(sendSmtpEmail);
 
-    const timeoutMs = getSmtpTimeoutMs();
-    const sendPromise = transporter.sendMail(mailOptions);
-    let timeoutId;
-    const timeoutPromise = new Promise((_, reject) => {
-      timeoutId = setTimeout(() => {
-        reject(new Error(`SMTP timeout after ${timeoutMs}ms`));
-      }, timeoutMs);
-    });
-
-    await Promise.race([sendPromise, timeoutPromise]).finally(() => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    });
-
-    console.log('[MAIL] success');
+    console.log('[MAIL] success', response);
     return true;
   } catch (sendError) {
-    console.error('[MAIL] error', sendError?.message || sendError);
+    const responsePayload = sendError?.response?.body || sendError?.response || sendError;
+    console.error('[MAIL ERROR]', responsePayload);
     return false;
   }
 };

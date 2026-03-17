@@ -46,9 +46,8 @@ A full-stack ERP application for inventory, procurement, sales, invoicing, and r
 Backend template: `backend/.env.example`
 - `MONGODB_URI` (or `DB_URI` / `MONGO_URI`)
 - `JWT_SECRET`
-- `EMAIL_USER`
-- `EMAIL_PASS`
-- `EMAIL_FROM` (optional)
+- `BREVO_API_KEY`
+- `BREVO_SENDER_EMAIL`
 - `ENABLE_EMAIL_OTP` (optional, default true)
 - `CORS_ALLOWED_ORIGINS` (optional, comma-separated)
 - `PORT` (optional, default 5001)

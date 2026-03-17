@@ -86,13 +86,19 @@ exports.resendOtp = async (req, res) => {
   try {
     const { email } = req.body;
     if (!email || !String(email).trim()) {
-      return error(res, 'Email is required', 400);
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required',
+      });
     }
 
     const normalizedEmail = String(email).toLowerCase().trim();
     const existingOtp = await OtpVerification.findOne({ email: normalizedEmail });
     if (!existingOtp) {
-      return error(res, 'No pending OTP for this email', 404);
+      return res.status(404).json({
+        success: false,
+        message: 'No pending OTP for this email',
+      });
     }
 
     const otp = otpGenerator.generate(6, {
@@ -101,7 +107,7 @@ exports.resendOtp = async (req, res) => {
       upperCaseAlphabets: false,
       specialChars: false
     });
-    console.log('[AUTH] resend OTP', { email: normalizedEmail, otp });
+    console.log('[OTP] Resending OTP', { email: normalizedEmail, otp });
 
     existingOtp.otp = otp;
     existingOtp.expiresAt = new Date(Date.now() + 5 * 60 * 1000);
@@ -109,14 +115,24 @@ exports.resendOtp = async (req, res) => {
 
     const emailSent = await sendOTPEmail(normalizedEmail, otp);
     if (!emailSent) {
-      return error(res, 'Failed to send OTP email', 500);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to resend OTP',
+      });
     }
 
-    return success(res, { email: normalizedEmail }, 'OTP resent');
+    return res.status(200).json({
+      success: true,
+      message: 'OTP resent successfully',
+      email: normalizedEmail,
+    });
   } catch (requestError) {
     console.error('[AUTH] resend OTP error', requestError);
     const isProduction = process.env.NODE_ENV === 'production';
-    return error(res, isProduction ? 'Failed to resend OTP' : requestError.message, 500);
+    return res.status(500).json({
+      success: false,
+      message: isProduction ? 'Failed to resend OTP' : requestError.message,
+    });
   }
 };
 
