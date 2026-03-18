@@ -1,11 +1,20 @@
 import axios from 'axios'
 import { getErrorMessage } from '../utils/errorUtils'
 
-const REQUEST_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT_MS) || 10_000
+const readViteEnv = () => {
+  try {
+    return (0, eval)('import.meta.env') || {}
+  } catch {
+    return {}
+  }
+}
+
+const viteEnv = readViteEnv()
+const REQUEST_TIMEOUT_MS = Number(viteEnv.VITE_API_TIMEOUT_MS) || 10_000
 
 const normalizeApiBaseUrl = (): string => {
   // Prefer explicit base URL env. Fallback to same-origin '/api' for production safety.
-  const rawBase = ((import.meta.env.VITE_API_BASE_URL as string) || '/api').trim()
+  const rawBase = ((viteEnv.VITE_API_BASE_URL as string) || '/api').trim()
   const withoutTrailingSlash = rawBase.replace(/\/+$/, '')
   if (!withoutTrailingSlash) {
     return '/api'

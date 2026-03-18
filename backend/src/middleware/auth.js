@@ -28,7 +28,7 @@ exports.checkAuth = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.id).select('tokenVersion');
+    const user = await User.findById(decoded.id).select('tokenVersion role name email');
     if (!user) {
       return error(res, 'Unauthorized - User not found', 401);
     }
@@ -37,7 +37,14 @@ exports.checkAuth = async (req, res, next) => {
       return error(res, 'Invalid token', 401);
     }
 
-    req.user = decoded;
+    req.user = {
+      id: user._id,
+      role: user.role,
+      name: user.name,
+      email: user.email,
+      tokenVersion: user.tokenVersion,
+      tv: decoded.tv,
+    };
     return next();
   } catch (authError) {
     if (authError.name === 'TokenExpiredError') {

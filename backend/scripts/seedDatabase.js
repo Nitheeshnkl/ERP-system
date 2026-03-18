@@ -15,10 +15,38 @@ const Invoice = require('../src/models/Invoice');
 dotenv.config();
 
 const userSeedData = [
-  { name: 'Admin User', email: 'admin@erp.local', password: 'Admin123', role: 'Admin' },
-  { name: 'Sales Manager', email: 'sales.manager@erp.local', password: 'Sales123', role: 'Sales' },
-  { name: 'Purchase Manager', email: 'purchase.manager@erp.local', password: 'Purchase123', role: 'Purchase' },
-  { name: 'Inventory Manager', email: 'inventory.manager@erp.local', password: 'Inventory123', role: 'Inventory' }
+  {
+    name: 'Admin User',
+    email: 'admin@example.com',
+    password: 'password123',
+    role: 'Admin',
+    isVerified: true,
+    emailVerified: true
+  },
+  {
+    name: 'Sales Manager',
+    email: 'sales.manager@erp.local',
+    password: 'Sales123',
+    role: 'Sales',
+    isVerified: true,
+    emailVerified: true
+  },
+  {
+    name: 'Purchase Manager',
+    email: 'purchase.manager@erp.local',
+    password: 'Purchase123',
+    role: 'Purchase',
+    isVerified: true,
+    emailVerified: true
+  },
+  {
+    name: 'Inventory Manager',
+    email: 'inventory.manager@erp.local',
+    password: 'Inventory123',
+    role: 'Inventory',
+    isVerified: true,
+    emailVerified: true
+  }
 ];
 
 const productSeedData = [

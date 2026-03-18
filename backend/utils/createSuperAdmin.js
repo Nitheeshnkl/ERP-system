@@ -20,6 +20,7 @@ const createSuperAdmin = async () => {
         email: normalizedEmail,
         password: adminPassword,
         role: 'Admin',
+        isVerified: true,
         emailVerified: true,
       });
 

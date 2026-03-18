@@ -203,17 +203,15 @@ exports.login = async (req, res) => {
       });
     }
 
-    console.log('Entered password:', password);
-    console.log('Stored hash:', user?.password);
     const passwordMatches = user ? await user.comparePassword(password) : false;
-    console.log('Password match:', passwordMatches);
 
     if (!user || !passwordMatches) {
       return error(res, 'Invalid credentials', 401);
     }
 
+    const emailOtpEnabled = String(process.env.ENABLE_EMAIL_OTP || 'true').toLowerCase() !== 'false';
     const isEmailVerified = user.isVerified !== false && user.emailVerified !== false;
-    if (!isEmailVerified && String(user.role).toLowerCase() !== 'admin') {
+    if (emailOtpEnabled && !isEmailVerified && String(user.role).toLowerCase() !== 'admin') {
       return error(res, 'Please verify your email before logging in', 403);
     }
 

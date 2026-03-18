@@ -1,0 +1,2408 @@
+{
+  "info": {
+    "_postman_id": "186d3f5e-69fe-4d38-9085-57562879490b",
+    "name": "ERP System API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /api/auth/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          },
+          "description": "Login with email and password to obtain a JWT token.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});",
+                  "const json = pm.response.json();",
+                  "if(json && (json.token || json.data?.token || json.data?.accessToken)) {",
+                  "  pm.environment.set(\"token\", json.token || json.data.token || json.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/auth/register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Inventory User\",\n  \"email\": \"inventory@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"Inventory\"\n}"
+            }
+          },
+          "description": "Register a new user and send OTP verification.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/auth/signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/signup",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sales User\",\n  \"email\": \"sales@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"Sales\"\n}"
+            }
+          },
+          "description": "Alias for register; creates a pending user with OTP verification.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/auth/verify-otp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/verify-otp",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sales@example.com\",\n  \"otp\": \"123456\"\n}"
+            }
+          },
+          "description": "Verify OTP to activate a pending user account.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/auth/verify-email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/verify-email",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sales@example.com\",\n  \"otp\": \"123456\"\n}"
+            }
+          },
+          "description": "Alias for OTP verification endpoint.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/auth/resend-otp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/resend-otp",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sales@example.com\"\n}"
+            }
+          },
+          "description": "Resend the OTP for a pending user.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/auth/logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/logout"
+          },
+          "description": "Invalidate the current session and clear the auth cookie.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/auth/me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/me"
+          },
+          "description": "Fetch the current user profile from the token.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "GET /api/auth/users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/users"
+          },
+          "description": "List all users (Admin only).",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "GET /api/products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/products?page=1&limit=10&search=bolt"
+          },
+          "description": "List products with pagination and search.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/products/{{productId}}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          },
+          "description": "Get a single product by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/products",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/products",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Steel Bolt\",\n  \"sku\": \"BOLT-001\",\n  \"description\": \"M8 steel bolt\",\n  \"price\": 2.5,\n  \"stockQuantity\": 100\n}"
+            }
+          },
+          "description": "Create a new product.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /api/products/{{productId}}",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/products/{{productId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 3,\n  \"stockQuantity\": 120\n}"
+            }
+          },
+          "description": "Update product fields by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/products/{{productId}}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          },
+          "description": "Delete a product by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "GET /api/customers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/customers?page=1&limit=10&search=acme"
+          },
+          "description": "List customers with pagination and search.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/customers/{{customerId}}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/customers/{{customerId}}"
+          },
+          "description": "Get a single customer by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/customers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/customers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Corp\",\n  \"email\": \"buyer@acme.com\",\n  \"phone\": \"555-0101\",\n  \"address\": \"123 Market St\"\n}"
+            }
+          },
+          "description": "Create a new customer.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /api/customers/{{customerId}}",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/customers/{{customerId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"555-0102\",\n  \"address\": \"456 Commerce Ave\"\n}"
+            }
+          },
+          "description": "Update customer fields by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/customers/{{customerId}}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/customers/{{customerId}}"
+          },
+          "description": "Delete a customer by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Suppliers",
+      "item": [
+        {
+          "name": "GET /api/suppliers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/suppliers?page=1&limit=10&search=supply"
+          },
+          "description": "List suppliers with pagination and search.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/suppliers/{{supplierId}}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/suppliers/{{supplierId}}"
+          },
+          "description": "Get a single supplier by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/suppliers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/suppliers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Supply Co\",\n  \"email\": \"sales@supplyco.com\",\n  \"phone\": \"555-0202\",\n  \"address\": \"45 Industrial Rd\",\n  \"city\": \"Chennai\",\n  \"state\": \"TN\",\n  \"country\": \"India\",\n  \"postalCode\": \"600001\"\n}"
+            }
+          },
+          "description": "Create a new supplier.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /api/suppliers/{{supplierId}}",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/suppliers/{{supplierId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"555-0203\",\n  \"city\": \"Bengaluru\"\n}"
+            }
+          },
+          "description": "Update supplier fields by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/suppliers/{{supplierId}}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/suppliers/{{supplierId}}"
+          },
+          "description": "Delete a supplier by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "PurchaseOrders",
+      "item": [
+        {
+          "name": "GET /api/purchase-orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/purchase-orders?page=1&limit=10&search=Pending"
+          },
+          "description": "List purchase orders with pagination and search.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/purchase-orders/{{purchaseOrderId}}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/purchase-orders/{{purchaseOrderId}}"
+          },
+          "description": "Get a single purchase order by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/purchase-orders",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/purchase-orders",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"supplierId\": \"64f000000000000000000010\",\n  \"items\": [\n    {\n      \"productId\": \"64f000000000000000000001\",\n      \"quantity\": 10,\n      \"unitPrice\": 5\n    }\n  ],\n  \"totalAmount\": 50,\n  \"status\": \"Pending\"\n}"
+            }
+          },
+          "description": "Create a new purchase order.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /api/purchase-orders/{{purchaseOrderId}}",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/purchase-orders/{{purchaseOrderId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Received\"\n}"
+            }
+          },
+          "description": "Update purchase order status or items.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/purchase-orders/{{purchaseOrderId}}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/purchase-orders/{{purchaseOrderId}}"
+          },
+          "description": "Delete a purchase order by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SalesOrders",
+      "item": [
+        {
+          "name": "GET /api/sales-orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/sales-orders?page=1&limit=10&search=Pending"
+          },
+          "description": "List sales orders with pagination and search.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/sales-orders/{{salesOrderId}}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/sales-orders/{{salesOrderId}}"
+          },
+          "description": "Get a single sales order by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/sales-orders",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/sales-orders",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"64f000000000000000000020\",\n  \"items\": [\n    {\n      \"productId\": \"64f000000000000000000001\",\n      \"quantity\": 2,\n      \"unitPrice\": 10\n    }\n  ],\n  \"totalAmount\": 20,\n  \"status\": \"Pending\"\n}"
+            }
+          },
+          "description": "Create a new sales order.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /api/sales-orders/{{salesOrderId}}",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/sales-orders/{{salesOrderId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Processing\"\n}"
+            }
+          },
+          "description": "Update sales order status or items.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/sales-orders/{{salesOrderId}}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/sales-orders/{{salesOrderId}}"
+          },
+          "description": "Delete a sales order by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "GRN",
+      "item": [
+        {
+          "name": "GET /api/grn",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/grn"
+          },
+          "description": "List all GRNs.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/grn/{{grnId}}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/grn/{{grnId}}"
+          },
+          "description": "Get a GRN by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/grn",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/grn",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"purchaseOrderId\": \"64f000000000000000000030\",\n  \"items\": [\n    {\n      \"productId\": \"64f000000000000000000001\",\n      \"receivedQuantity\": 5\n    }\n  ]\n}"
+            }
+          },
+          "description": "Create a GRN for a purchase order.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /api/grn/{{grnId}}",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/grn/{{grnId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"64f000000000000000000001\",\n      \"receivedQuantity\": 6\n    }\n  ]\n}"
+            }
+          },
+          "description": "Update a GRN record by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/grn/{{grnId}}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/grn/{{grnId}}"
+          },
+          "description": "Delete a GRN by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Invoices",
+      "item": [
+        {
+          "name": "GET /api/invoices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/invoices?page=1&limit=10&search=Pending"
+          },
+          "description": "List invoices with pagination and search.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/invoices/{{invoiceId}}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/invoices/{{invoiceId}}"
+          },
+          "description": "Get an invoice by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /api/invoices/{{invoiceId}}/status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/invoices/{{invoiceId}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Paid\"\n}"
+            }
+          },
+          "description": "Update the invoice payment status.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/invoices/{{invoiceId}}/pdf",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/invoices/{{invoiceId}}/pdf"
+          },
+          "description": "Download invoice PDF by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/invoices/{{invoiceId}}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/invoices/{{invoiceId}}"
+          },
+          "description": "Delete an invoice by id.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "GET /api/dashboard/metrics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/dashboard/metrics"
+          },
+          "description": "Fetch dashboard KPI metrics.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/dashboard/chart",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/dashboard/chart"
+          },
+          "description": "Fetch dashboard chart data.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "GET /api/reports/sales",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/reports/sales?format=csv"
+          },
+          "description": "Export sales report (csv or xlsx).",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/reports/invoices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/reports/invoices?format=csv"
+          },
+          "description": "Export invoices report (csv or xlsx).",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/health"
+          },
+          "description": "Health check endpoint.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /ready",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/ready"
+          },
+          "description": "Readiness check endpoint (requires DB).",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api"
+          },
+          "description": "API root status endpoint.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response structure\", function () {",
+                  "  const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "  if (contentType.includes('application/json')) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "    pm.expect(json).to.have.property('success');",
+                  "    pm.expect(json).to.have.property('message');",
+                  "    if (json.data !== undefined) {",
+                  "      pm.expect(json).to.have.property('data');",
+                  "    }",
+                  "  } else {",
+                  "    pm.expect(pm.response.text()).to.not.equal('');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

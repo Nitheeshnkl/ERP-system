@@ -4,12 +4,16 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
+const fs = require('fs');
+const path = require('path');
 const connectDB = require('./src/config/db');
 const createSuperAdmin = require('./utils/createSuperAdmin');
 const { success, error } = require('./src/utils/response');
 const { notFoundHandler, errorHandler } = require('./src/middleware/errorHandler');
 const { apiRateLimiter } = require('./src/middleware/rateLimit');
 const { sendOTPEmail } = require('./services/emailService');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
 
 // Route imports
 const authRoutes = require('./src/routes/authRoutes');
@@ -126,6 +130,17 @@ app.get('/test-email', async (_req, res) => {
   return res.status(500).json({ success: false });
 });
 
+// Swagger docs + OpenAPI spec export
+const docsDir = path.resolve(__dirname, '..', 'docs');
+const openapiPath = path.join(docsDir, 'openapi.json');
+if (!fs.existsSync(docsDir)) {
+  fs.mkdirSync(docsDir, { recursive: true });
+}
+fs.writeFileSync(openapiPath, JSON.stringify(swaggerSpec, null, 2));
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/docs/openapi.json', (_req, res) => res.json(swaggerSpec));
+
 // Routes
 app.use('/api', apiRateLimiter);
 app.use('/api/auth', authRoutes);
@@ -143,7 +158,7 @@ app.use('/api/reports', reportRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     const envOk = validateEnv();
